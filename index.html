@@ -1158,12 +1158,14 @@ async function editWorksheet(id) {
 
   const html = `
     <div id="editModal" style="position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:2000;display:flex;align-items:center;justify-content:center;padding:1.5rem;backdrop-filter:blur(4px)">
-      <div style="background:white;border-radius:16px;width:100%;max-width:520px;max-height:90vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,0.25)">
-        <div style="background:var(--accent);padding:1.25rem 1.5rem;display:flex;align-items:center;justify-content:space-between;border-radius:16px 16px 0 0">
+      <div style="background:white;border-radius:16px;width:100%;max-width:560px;max-height:92vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,0.25)">
+        <div style="background:var(--accent);padding:1.25rem 1.5rem;display:flex;align-items:center;justify-content:space-between;border-radius:16px 16px 0 0;position:sticky;top:0;z-index:1">
           <h2 style="color:white;font-family:'Chakra Petch',sans-serif;font-size:1.1rem">✏️ แก้ไขใบงาน</h2>
           <button onclick="document.getElementById('editModal').remove()" style="background:rgba(255,255,255,0.15);border:none;color:white;width:32px;height:32px;border-radius:6px;cursor:pointer;font-size:1rem">✕</button>
         </div>
         <div style="padding:1.5rem">
+
+          <!-- ข้อมูลใบงาน -->
           <div class="form-group">
             <label class="form-label">ชื่อใบงาน (ภาษาไทย) <span>*</span></label>
             <input class="form-input" id="edit-title" value="${w.title||''}">
@@ -1195,6 +1197,57 @@ async function editWorksheet(id) {
             <label class="form-label">แท็ก (คั่นด้วยจุลภาค)</label>
             <input class="form-input" id="edit-tags" value="${w.tags?w.tags.join(', '):''}">
           </div>
+
+          <!-- รูปภาพปัจจุบัน -->
+          <div style="border-top:1.5px dashed var(--border);margin:1.25rem 0;padding-top:1rem">
+            <div style="font-size:0.85rem;font-weight:700;color:var(--accent);margin-bottom:1rem;font-family:'Chakra Petch',sans-serif">🖼️ รูปภาพปัจจุบัน</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:1rem">
+              <div style="text-align:center">
+                <div style="font-size:0.75rem;color:var(--muted);margin-bottom:0.4rem">🎨 แบบสี (ไทย)</div>
+                ${w.image_url ? `<img src="${w.image_url}" style="width:100%;aspect-ratio:4/3;object-fit:contain;border-radius:6px;border:1.5px solid var(--border);background:#f8f6f2">` : '<div style="width:100%;aspect-ratio:4/3;background:#f0ede6;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#aaa;font-size:0.8rem">ไม่มีรูป</div>'}
+              </div>
+              <div style="text-align:center">
+                <div style="font-size:0.75rem;color:var(--muted);margin-bottom:0.4rem">🖍️ แบบระบายสี (ไทย)</div>
+                ${w.coloring_url ? `<img src="${w.coloring_url}" style="width:100%;aspect-ratio:4/3;object-fit:contain;border-radius:6px;border:1.5px solid var(--border);background:#f8f6f2">` : '<div style="width:100%;aspect-ratio:4/3;background:#f0ede6;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#aaa;font-size:0.8rem">ไม่มีรูป</div>'}
+              </div>
+            </div>
+          </div>
+
+          <!-- เปลี่ยนรูปภาพ -->
+          <div style="font-size:0.85rem;font-weight:700;color:var(--accent);margin-bottom:1rem;font-family:'Chakra Petch',sans-serif">🔄 เปลี่ยนรูปภาพ (ถ้าต้องการ)</div>
+          <div class="form-group">
+            <label class="form-label">🎨 เปลี่ยนไฟล์แบบสี (ภาษาไทย)</label>
+            <div class="upload-zone" style="padding:1rem">
+              <input type="file" id="edit-file" accept="image/*" onchange="previewFile(this,'edit-preview1','edit-img1')" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%">
+              <div class="upload-text" style="font-size:0.82rem">📁 คลิกเพื่อเลือกไฟล์ใหม่</div>
+              <div class="upload-preview" id="edit-preview1"><img id="edit-img1" src="" alt=""></div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">🖍️ เปลี่ยนไฟล์แบบระบายสี (ภาษาไทย)</label>
+            <div class="upload-zone" style="padding:1rem">
+              <input type="file" id="edit-file-coloring" accept="image/*" onchange="previewFile(this,'edit-preview2','edit-img2')" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%">
+              <div class="upload-text" style="font-size:0.82rem">📁 คลิกเพื่อเลือกไฟล์ใหม่</div>
+              <div class="upload-preview" id="edit-preview2"><img id="edit-img2" src="" alt=""></div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">🎨 เปลี่ยนไฟล์แบบสี (English)</label>
+            <div class="upload-zone" style="padding:1rem">
+              <input type="file" id="edit-file-en" accept="image/*" onchange="previewFile(this,'edit-preview3','edit-img3')" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%">
+              <div class="upload-text" style="font-size:0.82rem">📁 Click to select new file</div>
+              <div class="upload-preview" id="edit-preview3"><img id="edit-img3" src="" alt=""></div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">🖍️ เปลี่ยนไฟล์แบบระบายสี (English)</label>
+            <div class="upload-zone" style="padding:1rem">
+              <input type="file" id="edit-file-coloring-en" accept="image/*" onchange="previewFile(this,'edit-preview4','edit-img4')" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%">
+              <div class="upload-text" style="font-size:0.82rem">📁 Click to select new file</div>
+              <div class="upload-preview" id="edit-preview4"><img id="edit-img4" src="" alt=""></div>
+            </div>
+          </div>
+
           <button onclick="saveWorksheet('${w.id}')" class="btn-submit" style="margin-top:0.5rem">💾 บันทึกการแก้ไข</button>
         </div>
       </div>
@@ -1220,11 +1273,41 @@ async function saveWorksheet(id) {
   if (!title) { showToast('กรุณากรอกชื่อใบงาน', 'error'); return; }
   if (!cat) { showToast('กรุณาเลือกหมวดหมู่', 'error'); return; }
   const tags = tagsRaw ? tagsRaw.split(',').map(t=>t.trim()).filter(Boolean) : [];
+
+  const btn = document.querySelector('#editModal .btn-submit');
+  btn.disabled = true; btn.textContent = 'กำลังบันทึก...';
+
   try {
-    const res = await sb.from('worksheets').update({
-      title, title_en: titleEn||null, category: cat,
-      subject: subj||null, description: desc, description_en: descEn||null, tags
-    }).eq('id', String(id));
+    const catMap = {"อนุบาล1":"kg1","อนุบาล2":"kg2","อนุบาล3":"kg3","ป.1":"p1","ป.2":"p2","ป.3":"p3","ป.4":"p4","ป.5":"p5","ป.6":"p6"};
+    const catFolder = catMap[cat] || cat.replace(/[^a-zA-Z0-9]/g,'') || "other";
+    const updates = { title, title_en: titleEn||null, category: cat, subject: subj||null, description: desc, description_en: descEn||null, tags };
+
+    // Upload new files if selected
+    async function uploadNewFile(inputId) {
+      const file = document.getElementById(inputId).files[0];
+      if (!file) return null;
+      const ext = file.name.split('.').pop();
+      const fn = Date.now() + '_' + Math.random().toString(36).slice(2) + '.' + ext;
+      const fp = catFolder + '/' + fn;
+      const res = await sb.storage.from(BUCKET).upload(fp, file, {contentType: file.type});
+      if (res.error) throw res.error;
+      const { data: { publicUrl } } = sb.storage.from(BUCKET).getPublicUrl(fp);
+      return { url: publicUrl, path: fp };
+    }
+
+    const newFile = await uploadNewFile('edit-file');
+    if (newFile) { updates.image_url = newFile.url; updates.file_path = newFile.path; }
+
+    const newColoring = await uploadNewFile('edit-file-coloring');
+    if (newColoring) { updates.coloring_url = newColoring.url; updates.coloring_path = newColoring.path; }
+
+    const newFileEn = await uploadNewFile('edit-file-en');
+    if (newFileEn) { updates.image_url_en = newFileEn.url; updates.file_path_en = newFileEn.path; }
+
+    const newColoringEn = await uploadNewFile('edit-file-coloring-en');
+    if (newColoringEn) { updates.coloring_url_en = newColoringEn.url; updates.coloring_path_en = newColoringEn.path; }
+
+    const res = await sb.from('worksheets').update(updates).eq('id', String(id));
     if (res.error) throw res.error;
     showToast('✓ แก้ไขใบงานสำเร็จ!', 'success');
     document.getElementById('editModal').remove();
@@ -1232,6 +1315,7 @@ async function saveWorksheet(id) {
     renderManageList();
   } catch(e) {
     showToast('เกิดข้อผิดพลาด: ' + (e.message||'กรุณาลองใหม่'), 'error');
+    btn.disabled = false; btn.textContent = '💾 บันทึกการแก้ไข';
   }
 }
 
