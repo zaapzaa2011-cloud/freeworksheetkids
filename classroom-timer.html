@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Free Classroom Timer — FreeWorksheetKids.com</title>
+<meta name="description" content="Free classroom countdown timer for teachers. Set a timer, play sounds, and keep students on track. No sign-up required.">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&family=Chakra+Petch:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --accent: #2d6a4f;
+  --accent2: #f4a261;
+  --red: #e76f51;
+  --yellow: #f4a261;
+  --green: #2d6a4f;
+  --text: #1a1a1a;
+  --muted: #888;
+  --border: #e0dbd0;
+  --bg: #f7f5f0;
+  --surface: #fff;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Sarabun',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+
+header { background:var(--accent); padding:0 2rem; height:64px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:100; box-shadow:0 2px 12px rgba(45,106,79,0.3); }
+.logo { font-family:'Chakra Petch',sans-serif; font-size:1.2rem; font-weight:700; color:white; text-decoration:none; }
+.logo span { color:#f4a261; }
+nav a { color:rgba(255,255,255,0.8); text-decoration:none; font-size:0.9rem; margin-left:1.5rem; }
+nav a:hover { color:white; }
+
+.hero { background:linear-gradient(135deg,var(--accent),#40916c); padding:2.5rem 2rem 2rem; text-align:center; color:white; }
+.hero h1 { font-family:'Chakra Petch',sans-serif; font-size:clamp(1.6rem,4vw,2.5rem); margin-bottom:0.4rem; }
+.hero p { opacity:0.9; font-size:0.95rem; }
+
+.main { max-width:680px; margin:0 auto; padding:2rem 1.5rem 5rem; }
+
+/* TIMER DISPLAY */
+.timer-card { background:var(--surface); border:1.5px solid var(--border); border-radius:20px; padding:2.5rem 2rem; text-align:center; box-shadow:0 4px 24px rgba(0,0,0,0.08); margin-bottom:1.5rem; position:relative; overflow:hidden; }
+
+.timer-progress-ring { position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; }
+
+.timer-label { font-size:0.85rem; color:var(--muted); font-family:'Chakra Petch',sans-serif; letter-spacing:0.1em; margin-bottom:0.5rem; }
+
+.timer-display { font-family:'Chakra Petch',sans-serif; font-size:clamp(4rem,15vw,7rem); font-weight:700; line-height:1; margin-bottom:1rem; transition:color 0.3s; letter-spacing:0.05em; }
+.timer-display.green { color:var(--green); }
+.timer-display.yellow { color:var(--yellow); }
+.timer-display.red { color:var(--red); animation:pulse 0.5s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
+
+.timer-name { font-size:1.1rem; font-weight:600; color:var(--muted); margin-bottom:1.5rem; min-height:1.5rem; }
+
+.timer-controls { display:flex; gap:0.75rem; justify-content:center; flex-wrap:wrap; }
+.btn-ctrl { padding:12px 28px; border-radius:50px; font-family:'Sarabun',sans-serif; font-size:1rem; font-weight:700; cursor:pointer; transition:all 0.15s; border:none; display:flex; align-items:center; gap:6px; }
+.btn-start { background:var(--accent); color:white; }
+.btn-start:hover { background:#245a42; transform:scale(1.03); }
+.btn-pause { background:var(--yellow); color:white; }
+.btn-pause:hover { background:#d88a40; }
+.btn-reset { background:#f0ede6; color:var(--text); border:1.5px solid var(--border); }
+.btn-reset:hover { background:var(--border); }
+.btn-fullscreen { background:#f0ede6; color:var(--text); border:1.5px solid var(--border); padding:12px 16px; border-radius:50px; }
+.btn-fullscreen:hover { background:var(--border); }
+
+/* PRESETS */
+.presets-card { background:var(--surface); border:1.5px solid var(--border); border-radius:16px; padding:1.5rem; margin-bottom:1.5rem; box-shadow:0 2px 12px rgba(0,0,0,0.06); }
+.presets-card h3 { font-family:'Chakra Petch',sans-serif; font-size:0.95rem; color:var(--accent); margin-bottom:1rem; }
+.presets-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(90px,1fr)); gap:0.5rem; }
+.preset-btn { background:#f0ede6; border:1.5px solid var(--border); color:var(--text); font-family:'Sarabun',sans-serif; font-size:0.85rem; font-weight:600; padding:10px 8px; border-radius:8px; cursor:pointer; transition:all 0.15s; text-align:center; }
+.preset-btn:hover { border-color:var(--accent); color:var(--accent); background:#eaf2ee; }
+.preset-btn.active { background:var(--accent); border-color:var(--accent); color:white; }
+
+/* CUSTOM SET */
+.custom-card { background:var(--surface); border:1.5px solid var(--border); border-radius:16px; padding:1.5rem; margin-bottom:1.5rem; box-shadow:0 2px 12px rgba(0,0,0,0.06); }
+.custom-card h3 { font-family:'Chakra Petch',sans-serif; font-size:0.95rem; color:var(--accent); margin-bottom:1rem; }
+.time-inputs { display:flex; gap:0.75rem; align-items:center; margin-bottom:1rem; }
+.time-input-group { flex:1; text-align:center; }
+.time-input-group label { display:block; font-size:0.75rem; color:var(--muted); margin-bottom:0.3rem; font-family:'Chakra Petch',sans-serif; }
+.time-spinner { width:100%; background:#f0ede6; border:1.5px solid var(--border); color:var(--text); font-family:'Chakra Petch',sans-serif; font-size:1.5rem; font-weight:700; padding:10px; border-radius:8px; text-align:center; outline:none; }
+.time-spinner:focus { border-color:var(--accent); }
+.time-sep { font-size:1.5rem; font-weight:700; color:var(--muted); padding-top:1.2rem; }
+.name-input { width:100%; background:#f0ede6; border:1.5px solid var(--border); color:var(--text); font-family:'Sarabun',sans-serif; font-size:0.95rem; padding:10px 14px; border-radius:8px; outline:none; }
+.name-input:focus { border-color:var(--accent); background:white; }
+.btn-set { width:100%; background:var(--accent); border:none; color:white; font-family:'Sarabun',sans-serif; font-size:0.95rem; font-weight:700; padding:12px; border-radius:8px; cursor:pointer; margin-top:0.75rem; transition:background 0.15s; }
+.btn-set:hover { background:#245a42; }
+
+/* SOUND TOGGLE */
+.sound-row { display:flex; align-items:center; justify-content:space-between; background:#f0ede6; border-radius:8px; padding:0.75rem 1rem; margin-top:0.75rem; }
+.sound-row label { font-size:0.88rem; color:var(--text); font-weight:600; display:flex; align-items:center; gap:0.5rem; }
+.toggle { position:relative; width:44px; height:24px; }
+.toggle input { opacity:0; width:0; height:0; }
+.toggle-slider { position:absolute; inset:0; background:#ccc; border-radius:24px; cursor:pointer; transition:0.3s; }
+.toggle-slider:before { content:''; position:absolute; width:18px; height:18px; left:3px; top:3px; background:white; border-radius:50%; transition:0.3s; }
+.toggle input:checked + .toggle-slider { background:var(--accent); }
+.toggle input:checked + .toggle-slider:before { transform:translateX(20px); }
+
+/* FULLSCREEN */
+body.fullscreen-mode { background:#1a1a1a; }
+body.fullscreen-mode header, body.fullscreen-mode .presets-card,
+body.fullscreen-mode .custom-card, body.fullscreen-mode footer { display:none; }
+body.fullscreen-mode .main { max-width:100%; padding:0; display:flex; align-items:center; justify-content:center; min-height:100vh; }
+body.fullscreen-mode .timer-card { border:none; border-radius:0; box-shadow:none; background:#1a1a1a; padding:3rem; width:100%; }
+body.fullscreen-mode .timer-display { font-size:20vw; }
+body.fullscreen-mode .timer-display.green { color:#4ade80; }
+body.fullscreen-mode .timer-display.red { color:#f87171; }
+body.fullscreen-mode .timer-display.yellow { color:#fbbf24; }
+body.fullscreen-mode .timer-name { color:#888; font-size:1.5rem; }
+body.fullscreen-mode .btn-ctrl { font-size:1.1rem; padding:14px 32px; }
+body.fullscreen-mode .btn-reset, body.fullscreen-mode .btn-fullscreen { color:white; border-color:#555; background:#333; }
+
+footer { background:var(--accent); color:rgba(255,255,255,0.7); text-align:center; padding:1.5rem; font-size:0.85rem; }
+footer a { color:rgba(255,255,255,0.9); margin:0 0.5rem; }
+</style>
+</head>
+<body>
+
+<header>
+  <a href="/" class="logo">Free<span>WorksheetKids</span></a>
+  <nav>
+    <a href="/">Worksheets</a>
+    <a href="/qr-generator.html">QR Code</a>
+    <a href="/contact.html">Contact</a>
+  </nav>
+</header>
+
+<div class="hero">
+  <h1>⏱️ Classroom Timer</h1>
+  <p>Free countdown timer for teachers — set time, name your activity, and keep class on track.</p>
+</div>
+
+<div class="main">
+
+  <!-- TIMER DISPLAY -->
+  <div class="timer-card" id="timerCard">
+    <div class="timer-label">TIME REMAINING</div>
+    <div class="timer-display green" id="timerDisplay">05:00</div>
+    <div class="timer-name" id="timerName">Ready to start!</div>
+    <div class="timer-controls">
+      <button class="btn-ctrl btn-start" id="btnStart" onclick="startTimer()">▶ Start</button>
+      <button class="btn-ctrl btn-reset" onclick="resetTimer()">↺ Reset</button>
+      <button class="btn-ctrl btn-fullscreen" onclick="toggleFullscreen()" title="Fullscreen">⛶</button>
+    </div>
+  </div>
+
+  <!-- PRESETS -->
+  <div class="presets-card">
+    <h3>⚡ Quick Presets</h3>
+    <div class="presets-grid">
+      <button class="preset-btn" onclick="setPreset(1,0,'1 min')">1 min</button>
+      <button class="preset-btn" onclick="setPreset(2,0,'2 min')">2 min</button>
+      <button class="preset-btn active" onclick="setPreset(5,0,'5 min')">5 min</button>
+      <button class="preset-btn" onclick="setPreset(10,0,'10 min')">10 min</button>
+      <button class="preset-btn" onclick="setPreset(15,0,'15 min')">15 min</button>
+      <button class="preset-btn" onclick="setPreset(20,0,'20 min')">20 min</button>
+      <button class="preset-btn" onclick="setPreset(25,0,'25 min')">25 min</button>
+      <button class="preset-btn" onclick="setPreset(30,0,'30 min')">30 min</button>
+      <button class="preset-btn" onclick="setPreset(45,0,'45 min')">45 min</button>
+      <button class="preset-btn" onclick="setPreset(60,0,'1 hour')">1 hour</button>
+      <button class="preset-btn" onclick="setPreset(0,30,'30 sec')">30 sec</button>
+      <button class="preset-btn" onclick="setPreset(0,10,'10 sec')">10 sec</button>
+    </div>
+  </div>
+
+  <!-- CUSTOM -->
+  <div class="custom-card">
+    <h3>⚙️ Custom Timer</h3>
+    <div class="time-inputs">
+      <div class="time-input-group">
+        <label>HOURS</label>
+        <input class="time-spinner" type="number" id="inputH" min="0" max="23" value="0">
+      </div>
+      <div class="time-sep">:</div>
+      <div class="time-input-group">
+        <label>MINUTES</label>
+        <input class="time-spinner" type="number" id="inputM" min="0" max="59" value="5">
+      </div>
+      <div class="time-sep">:</div>
+      <div class="time-input-group">
+        <label>SECONDS</label>
+        <input class="time-spinner" type="number" id="inputS" min="0" max="59" value="0">
+      </div>
+    </div>
+    <input class="name-input" type="text" id="inputName" placeholder="Activity name (e.g. Group Work, Quiz Time...)">
+    <div class="sound-row">
+      <label>🔔 Play sound when done</label>
+      <label class="toggle">
+        <input type="checkbox" id="soundToggle" checked>
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+    <button class="btn-set" onclick="setCustomTimer()">✓ Set Timer</button>
+  </div>
+
+</div>
+
+<footer>
+  <p>© 2026 FreeWorksheetKids.com</p>
+  <p style="margin-top:0.4rem">
+    <a href="/">Worksheets</a> ·
+    <a href="/qr-generator.html">QR Generator</a> ·
+    <a href="/classroom-timer.html">Timer</a> ·
+    <a href="/about.html">About</a> ·
+    <a href="/privacy-policy.html">Privacy Policy</a>
+  </p>
+</footer>
+
+<script>
+let totalSeconds = 300;
+let remainingSeconds = 300;
+let timerInterval = null;
+let isRunning = false;
+let isFullscreen = false;
+
+function pad(n) { return String(n).padStart(2,'0'); }
+
+function formatTime(s) {
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const sec = s % 60;
+  if (h > 0) return pad(h) + ':' + pad(m) + ':' + pad(sec);
+  return pad(m) + ':' + pad(sec);
+}
+
+function updateDisplay() {
+  const display = document.getElementById('timerDisplay');
+  display.textContent = formatTime(remainingSeconds);
+  const pct = totalSeconds > 0 ? remainingSeconds / totalSeconds : 1;
+  display.className = 'timer-display ' + (pct > 0.5 ? 'green' : pct > 0.2 ? 'yellow' : 'red');
+}
+
+function startTimer() {
+  if (isRunning) {
+    clearInterval(timerInterval);
+    isRunning = false;
+    document.getElementById('btnStart').innerHTML = '▶ Resume';
+    document.getElementById('btnStart').className = 'btn-ctrl btn-start';
+    return;
+  }
+  if (remainingSeconds <= 0) { resetTimer(); return; }
+  isRunning = true;
+  document.getElementById('btnStart').innerHTML = '⏸ Pause';
+  document.getElementById('btnStart').className = 'btn-ctrl btn-pause';
+  timerInterval = setInterval(() => {
+    if (remainingSeconds <= 0) {
+      clearInterval(timerInterval);
+      isRunning = false;
+      document.getElementById('btnStart').innerHTML = '▶ Start';
+      document.getElementById('btnStart').className = 'btn-ctrl btn-start';
+      document.getElementById('timerName').textContent = "⏰ Time's up!";
+      if (document.getElementById('soundToggle').checked) playDoneSound();
+      return;
+    }
+    remainingSeconds--;
+    updateDisplay();
+  }, 1000);
+}
+
+function resetTimer() {
+  clearInterval(timerInterval);
+  isRunning = false;
+  remainingSeconds = totalSeconds;
+  updateDisplay();
+  document.getElementById('btnStart').innerHTML = '▶ Start';
+  document.getElementById('btnStart').className = 'btn-ctrl btn-start';
+}
+
+function setPreset(min, sec, label) {
+  clearInterval(timerInterval);
+  isRunning = false;
+  totalSeconds = min * 60 + sec;
+  remainingSeconds = totalSeconds;
+  updateDisplay();
+  document.getElementById('timerName').textContent = label;
+  document.getElementById('btnStart').innerHTML = '▶ Start';
+  document.getElementById('btnStart').className = 'btn-ctrl btn-start';
+  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+}
+
+function setCustomTimer() {
+  const h = parseInt(document.getElementById('inputH').value) || 0;
+  const m = parseInt(document.getElementById('inputM').value) || 0;
+  const s = parseInt(document.getElementById('inputS').value) || 0;
+  const name = document.getElementById('inputName').value.trim() || 'Custom Timer';
+  const total = h*3600 + m*60 + s;
+  if (total <= 0) { alert('Please set a time greater than 0'); return; }
+  clearInterval(timerInterval);
+  isRunning = false;
+  totalSeconds = total;
+  remainingSeconds = total;
+  updateDisplay();
+  document.getElementById('timerName').textContent = name;
+  document.getElementById('btnStart').innerHTML = '▶ Start';
+  document.getElementById('btnStart').className = 'btn-ctrl btn-start';
+  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+}
+
+function playDoneSound() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const notes = [523, 659, 784, 1047];
+    notes.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.frequency.value = freq;
+      osc.type = 'sine';
+      gain.gain.setValueAtTime(0.3, ctx.currentTime + i*0.15);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + i*0.15 + 0.3);
+      osc.start(ctx.currentTime + i*0.15);
+      osc.stop(ctx.currentTime + i*0.15 + 0.3);
+    });
+  } catch(e) {}
+}
+
+function toggleFullscreen() {
+  isFullscreen = !isFullscreen;
+  document.body.classList.toggle('fullscreen-mode', isFullscreen);
+  document.querySelector('.btn-fullscreen').textContent = isFullscreen ? '✕ Exit' : '⛶';
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === ' ' && e.target.tagName !== 'INPUT') { e.preventDefault(); startTimer(); }
+  if (e.key === 'Escape' && isFullscreen) toggleFullscreen();
+  if (e.key === 'r' || e.key === 'R') resetTimer();
+});
+
+updateDisplay();
+</script>
+</body>
+</html>

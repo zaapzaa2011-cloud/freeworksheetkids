@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Free QR Code Generator — FreeWorksheetKids.com</title>
+<meta name="description" content="Free QR Code Generator. Create QR codes for URLs, text, emails, and more. Download as PNG instantly.">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&family=Chakra+Petch:wght@600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<style>
+:root {
+  --accent: #2d6a4f;
+  --accent2: #f4a261;
+  --text: #1a1a1a;
+  --muted: #888;
+  --border: #e0dbd0;
+  --bg: #f7f5f0;
+  --surface: #fff;
+  --shadow: 0 4px 20px rgba(0,0,0,0.08);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Sarabun',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+
+header { background:var(--accent); padding:0 2rem; height:64px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:100; box-shadow:0 2px 12px rgba(45,106,79,0.3); }
+.logo { font-family:'Chakra Petch',sans-serif; font-size:1.2rem; font-weight:700; color:white; text-decoration:none; }
+.logo span { color:#f4a261; }
+nav a { color:rgba(255,255,255,0.8); text-decoration:none; font-size:0.9rem; margin-left:1.5rem; }
+nav a:hover { color:white; }
+
+.hero { background:linear-gradient(135deg,var(--accent),#40916c); padding:3rem 2rem 2.5rem; text-align:center; color:white; }
+.hero h1 { font-family:'Chakra Petch',sans-serif; font-size:clamp(1.8rem,4vw,2.8rem); margin-bottom:0.5rem; }
+.hero p { opacity:0.9; font-size:1rem; }
+
+.main { max-width:900px; margin:0 auto; padding:2.5rem 1.5rem 5rem; display:grid; grid-template-columns:1fr 1fr; gap:2rem; }
+
+.card { background:var(--surface); border:1.5px solid var(--border); border-radius:16px; padding:2rem; box-shadow:var(--shadow); }
+.card h2 { font-family:'Chakra Petch',sans-serif; font-size:1.1rem; color:var(--accent); margin-bottom:1.5rem; }
+
+.type-tabs { display:flex; flex-wrap:wrap; gap:0.5rem; margin-bottom:1.5rem; }
+.type-tab { background:var(--bg); border:1.5px solid var(--border); color:var(--muted); font-family:'Sarabun',sans-serif; font-size:0.82rem; padding:6px 14px; border-radius:20px; cursor:pointer; transition:all 0.15s; }
+.type-tab:hover { border-color:var(--accent); color:var(--accent); }
+.type-tab.active { background:var(--accent); border-color:var(--accent); color:white; font-weight:600; }
+
+.form-group { margin-bottom:1.1rem; }
+.form-label { display:block; font-size:0.85rem; font-weight:600; margin-bottom:0.4rem; color:var(--text); }
+.form-input, .form-textarea { width:100%; background:#f8f6f2; border:1.5px solid var(--border); color:var(--text); font-family:'Sarabun',sans-serif; font-size:0.95rem; padding:10px 14px; border-radius:8px; outline:none; transition:border-color 0.2s; }
+.form-input:focus, .form-textarea:focus { border-color:var(--accent); background:white; }
+.form-textarea { resize:vertical; min-height:90px; }
+
+.size-row { display:flex; gap:0.75rem; align-items:center; }
+.size-row label { font-size:0.85rem; color:var(--muted); white-space:nowrap; }
+.size-row input[type="range"] { flex:1; accent-color:var(--accent); }
+.size-value { font-size:0.85rem; font-weight:700; color:var(--accent); font-family:'Chakra Petch',sans-serif; min-width:50px; }
+
+.color-row { display:flex; gap:1rem; }
+.color-item { flex:1; }
+.color-item label { display:block; font-size:0.82rem; color:var(--muted); margin-bottom:0.4rem; }
+.color-item input[type="color"] { width:100%; height:40px; border:1.5px solid var(--border); border-radius:6px; cursor:pointer; padding:2px; background:white; }
+
+.btn-generate { width:100%; background:var(--accent); border:none; color:white; font-family:'Sarabun',sans-serif; font-size:1rem; font-weight:700; padding:13px; border-radius:8px; cursor:pointer; transition:background 0.15s; margin-top:0.5rem; }
+.btn-generate:hover { background:#245a42; }
+
+/* QR Result */
+.qr-result { text-align:center; }
+.qr-preview { background:#fff; border:1.5px solid var(--border); border-radius:12px; padding:2rem; margin-bottom:1.5rem; min-height:220px; display:flex; align-items:center; justify-content:center; flex-direction:column; }
+.qr-placeholder { color:var(--muted); font-size:0.9rem; }
+.qr-placeholder span { display:block; font-size:3rem; margin-bottom:0.75rem; }
+#qrCanvas { border-radius:8px; }
+
+.download-btns { display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; margin-bottom:1.5rem; }
+.btn-dl { padding:11px; border-radius:8px; font-family:'Sarabun',sans-serif; font-size:0.9rem; font-weight:700; cursor:pointer; transition:all 0.15s; border:1.5px solid; display:flex; align-items:center; justify-content:center; gap:6px; }
+.btn-dl-primary { background:var(--accent); border-color:var(--accent); color:white; }
+.btn-dl-primary:hover { background:#245a42; }
+.btn-dl-secondary { background:white; border-color:var(--border); color:var(--text); }
+.btn-dl-secondary:hover { border-color:var(--accent); color:var(--accent); }
+
+.qr-info { background:var(--bg); border-radius:8px; padding:1rem; font-size:0.82rem; color:var(--muted); line-height:1.6; text-align:left; }
+.qr-info strong { color:var(--text); }
+
+/* Tips */
+.tips { grid-column:1/-1; background:var(--surface); border:1.5px solid var(--border); border-radius:16px; padding:2rem; box-shadow:var(--shadow); }
+.tips h2 { font-family:'Chakra Petch',sans-serif; font-size:1.1rem; color:var(--accent); margin-bottom:1.25rem; }
+.tips-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:1rem; }
+.tip-item { display:flex; gap:0.75rem; align-items:flex-start; }
+.tip-icon { font-size:1.5rem; flex-shrink:0; }
+.tip-text h3 { font-size:0.88rem; font-weight:700; margin-bottom:0.25rem; }
+.tip-text p { font-size:0.82rem; color:var(--muted); line-height:1.5; }
+
+footer { background:var(--accent); color:rgba(255,255,255,0.7); text-align:center; padding:1.5rem; font-size:0.85rem; }
+footer a { color:rgba(255,255,255,0.9); margin:0 0.5rem; }
+
+@media(max-width:640px) {
+  .main { grid-template-columns:1fr; }
+  .tips { grid-column:1; }
+  .download-btns { grid-template-columns:1fr; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <a href="/" class="logo">Free<span>WorksheetKids</span></a>
+  <nav>
+    <a href="/">Worksheets</a>
+    <a href="/about.html">About</a>
+    <a href="/contact.html">Contact</a>
+  </nav>
+</header>
+
+<div class="hero">
+  <h1>🔲 Free QR Code Generator</h1>
+  <p>Create QR codes instantly — for URLs, text, email, WiFi, and more. Free & no sign-up required.</p>
+</div>
+
+<div class="main">
+
+  <!-- LEFT: INPUT -->
+  <div class="card">
+    <h2>✏️ Enter Your Content</h2>
+
+    <div class="type-tabs">
+      <button class="type-tab active" onclick="setType('url',this)">🔗 URL</button>
+      <button class="type-tab" onclick="setType('text',this)">📝 Text</button>
+      <button class="type-tab" onclick="setType('email',this)">📧 Email</button>
+      <button class="type-tab" onclick="setType('wifi',this)">📶 WiFi</button>
+      <button class="type-tab" onclick="setType('phone',this)">📞 Phone</button>
+    </div>
+
+    <!-- URL -->
+    <div id="input-url">
+      <div class="form-group">
+        <label class="form-label">Website URL</label>
+        <input class="form-input" type="url" id="url-input" placeholder="https://freeworksheetkids.com" value="https://">
+      </div>
+    </div>
+
+    <!-- TEXT -->
+    <div id="input-text" style="display:none">
+      <div class="form-group">
+        <label class="form-label">Text Content</label>
+        <textarea class="form-textarea" id="text-input" placeholder="Enter any text here..."></textarea>
+      </div>
+    </div>
+
+    <!-- EMAIL -->
+    <div id="input-email" style="display:none">
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <input class="form-input" type="email" id="email-input" placeholder="example@email.com">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Subject (optional)</label>
+        <input class="form-input" type="text" id="email-subject" placeholder="Email subject">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Message (optional)</label>
+        <textarea class="form-textarea" id="email-body" placeholder="Email message..." style="min-height:70px"></textarea>
+      </div>
+    </div>
+
+    <!-- WIFI -->
+    <div id="input-wifi" style="display:none">
+      <div class="form-group">
+        <label class="form-label">Network Name (SSID)</label>
+        <input class="form-input" type="text" id="wifi-ssid" placeholder="MyWiFiNetwork">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input class="form-input" type="text" id="wifi-pass" placeholder="WiFi password">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Security Type</label>
+        <select class="form-input" id="wifi-type">
+          <option value="WPA">WPA/WPA2</option>
+          <option value="WEP">WEP</option>
+          <option value="nopass">None (Open)</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- PHONE -->
+    <div id="input-phone" style="display:none">
+      <div class="form-group">
+        <label class="form-label">Phone Number</label>
+        <input class="form-input" type="tel" id="phone-input" placeholder="+66812345678">
+      </div>
+    </div>
+
+    <!-- OPTIONS -->
+    <div class="form-group">
+      <label class="form-label">QR Code Size</label>
+      <div class="size-row">
+        <input type="range" id="qr-size" min="128" max="512" value="256" step="32" oninput="document.getElementById('size-val').textContent=this.value+'px'">
+        <span class="size-value" id="size-val">256px</span>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Colors</label>
+      <div class="color-row">
+        <div class="color-item">
+          <label>QR Color</label>
+          <input type="color" id="qr-color" value="#000000">
+        </div>
+        <div class="color-item">
+          <label>Background</label>
+          <input type="color" id="qr-bg" value="#ffffff">
+        </div>
+      </div>
+    </div>
+
+    <button class="btn-generate" onclick="generateQR()">
+      🔲 Generate QR Code
+    </button>
+  </div>
+
+  <!-- RIGHT: RESULT -->
+  <div class="card">
+    <h2>📱 Your QR Code</h2>
+
+    <div class="qr-preview" id="qrPreview">
+      <div class="qr-placeholder">
+        <span>🔲</span>
+        Your QR code will appear here
+      </div>
+      <canvas id="qrCanvas" style="display:none"></canvas>
+    </div>
+
+    <div class="download-btns" id="downloadBtns" style="display:none">
+      <button class="btn-dl btn-dl-primary" onclick="downloadQR('png')">
+        ⬇️ Download PNG
+      </button>
+      <button class="btn-dl btn-dl-secondary" onclick="copyQR()">
+        📋 Copy Image
+      </button>
+    </div>
+
+    <div class="qr-info" id="qrInfo" style="display:none">
+      <strong>Content:</strong> <span id="qrContentPreview"></span>
+    </div>
+  </div>
+
+  <!-- TIPS -->
+  <div class="tips">
+    <h2>💡 How to Use QR Codes</h2>
+    <div class="tips-grid">
+      <div class="tip-item">
+        <span class="tip-icon">📚</span>
+        <div class="tip-text">
+          <h3>Classroom Links</h3>
+          <p>Create QR codes for assignment links so students can access them easily with their phones.</p>
+        </div>
+      </div>
+      <div class="tip-item">
+        <span class="tip-icon">📶</span>
+        <div class="tip-text">
+          <h3>WiFi Sharing</h3>
+          <p>Share your WiFi password as a QR code — guests just scan and connect instantly.</p>
+        </div>
+      </div>
+      <div class="tip-item">
+        <span class="tip-icon">📇</span>
+        <div class="tip-text">
+          <h3>Contact Info</h3>
+          <p>Put a QR code on your business card or worksheet with your contact details.</p>
+        </div>
+      </div>
+      <div class="tip-item">
+        <span class="tip-icon">🖨️</span>
+        <div class="tip-text">
+          <h3>Print & Share</h3>
+          <p>Download as PNG and add to your printed worksheets, posters, or handouts.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <p>© 2026 FreeWorksheetKids.com</p>
+  <p style="margin-top:0.4rem">
+    <a href="/">Worksheets</a> ·
+    <a href="/qr-generator.html">QR Generator</a> ·
+    <a href="/about.html">About</a> ·
+    <a href="/contact.html">Contact</a> ·
+    <a href="/privacy-policy.html">Privacy Policy</a>
+  </p>
+</footer>
+
+<script>
+let currentType = 'url';
+
+function setType(type, btn) {
+  currentType = type;
+  document.querySelectorAll('.type-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  ['url','text','email','wifi','phone'].forEach(t => {
+    const el = document.getElementById('input-' + t);
+    if(el) el.style.display = t === type ? 'block' : 'none';
+  });
+}
+
+function getContent() {
+  switch(currentType) {
+    case 'url': return document.getElementById('url-input').value.trim();
+    case 'text': return document.getElementById('text-input').value.trim();
+    case 'email': {
+      const email = document.getElementById('email-input').value.trim();
+      const subject = document.getElementById('email-subject').value.trim();
+      const body = document.getElementById('email-body').value.trim();
+      let mailto = 'mailto:' + email;
+      const params = [];
+      if(subject) params.push('subject=' + encodeURIComponent(subject));
+      if(body) params.push('body=' + encodeURIComponent(body));
+      if(params.length) mailto += '?' + params.join('&');
+      return mailto;
+    }
+    case 'wifi': {
+      const ssid = document.getElementById('wifi-ssid').value.trim();
+      const pass = document.getElementById('wifi-pass').value.trim();
+      const type = document.getElementById('wifi-type').value;
+      return `WIFI:T:${type};S:${ssid};P:${pass};;`;
+    }
+    case 'phone': return 'tel:' + document.getElementById('phone-input').value.trim();
+    default: return '';
+  }
+}
+
+function generateQR() {
+  const content = getContent();
+  if (!content || content === 'https://') {
+    alert('Please enter content first!');
+    return;
+  }
+
+  const size = parseInt(document.getElementById('qr-size').value);
+  const color = document.getElementById('qr-color').value;
+  const bg = document.getElementById('qr-bg').value;
+  const canvas = document.getElementById('qrCanvas');
+
+  QRCode.toCanvas(canvas, content, {
+    width: size,
+    color: { dark: color, light: bg },
+    errorCorrectionLevel: 'M',
+    margin: 2
+  }, function(error) {
+    if (error) { alert('Error: ' + error.message); return; }
+    document.querySelector('.qr-placeholder').style.display = 'none';
+    canvas.style.display = 'block';
+    document.getElementById('downloadBtns').style.display = 'grid';
+    document.getElementById('qrInfo').style.display = 'block';
+    const preview = content.length > 50 ? content.substring(0, 50) + '...' : content;
+    document.getElementById('qrContentPreview').textContent = preview;
+  });
+}
+
+function downloadQR(format) {
+  const canvas = document.getElementById('qrCanvas');
+  const link = document.createElement('a');
+  link.download = 'qrcode-freeworksheetkids.png';
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+}
+
+async function copyQR() {
+  const canvas = document.getElementById('qrCanvas');
+  canvas.toBlob(async (blob) => {
+    try {
+      await navigator.clipboard.write([new ClipboardItem({'image/png': blob})]);
+      alert('QR Code copied to clipboard!');
+    } catch(e) {
+      downloadQR('png');
+    }
+  });
+}
+
+// Auto-generate on Enter
+document.addEventListener('keydown', e => {
+  if(e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') generateQR();
+});
+</script>
+</body>
+</html>

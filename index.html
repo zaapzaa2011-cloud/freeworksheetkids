@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>คลังใบงาน — ฟรีสำหรับทุกคน</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700;800&family=Chakra+Petch:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root {
+  --bg: #f7f5f0;
+  --surface: #ffffff;
+  --surface2: #f0ede6;
+  --border: #e0dbd0;
+  --accent: #2d6a4f;
+  --accent2: #f4a261;
+  --accent3: #e76f51;
+  --text: #1a1a1a;
+  --muted: #888;
+  --tag-bg: #eaf2ee;
+  --tag-color: #2d6a4f;
+  --shadow: 0 2px 12px rgba(0,0,0,0.08);
+  --shadow-hover: 0 8px 32px rgba(0,0,0,0.14);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Sarabun', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+header {
+  background: var(--accent);
+  padding: 0 2rem;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 12px rgba(45,106,79,0.3);
+}
+.logo { font-family: 'Chakra Petch', sans-serif; font-size: 1.3rem; font-weight: 700; color: white; letter-spacing: 0.05em; }
+.logo span { color: var(--accent2); }
+.header-actions { display: flex; align-items: center; gap: 0.75rem; }
+.btn-admin { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: white; font-family: 'Sarabun', sans-serif; font-size: 0.85rem; padding: 7px 16px; border-radius: 6px; cursor: pointer; transition: all 0.15s; }
+.btn-admin:hover { background: rgba(255,255,255,0.25); }
+.stats-badge { background: rgba(255,255,255,0.15); color: rgba(255,255,255,0.9); padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-family: 'Chakra Petch', sans-serif; }
+
+.hero { background: linear-gradient(135deg, var(--accent) 0%, #40916c 100%); padding: 3.5rem 2rem 3rem; color: white; position: relative; overflow: hidden; }
+.hero::before { content: ''; position: absolute; top: -50%; right: -10%; width: 400px; height: 400px; background: rgba(255,255,255,0.05); border-radius: 50%; }
+.hero-content { position: relative; z-index: 1; max-width: 700px; }
+.hero h1 { font-family: 'Chakra Petch', sans-serif; font-size: clamp(1.8rem, 4vw, 3rem); font-weight: 700; line-height: 1.2; margin-bottom: 0.5rem; }
+.hero h1 em { font-style: normal; color: var(--accent2); }
+.hero p { opacity: 0.85; font-size: 1rem; margin-bottom: 1.75rem; font-weight: 300; }
+.search-wrap { position: relative; max-width: 520px; }
+.search-wrap svg { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--muted); z-index: 1; }
+.search-input { width: 100%; background: white; border: none; color: var(--text); font-family: 'Sarabun', sans-serif; font-size: 1rem; padding: 13px 16px 13px 44px; border-radius: 8px; outline: none; box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
+.search-input::placeholder { color: #aaa; }
+
+.filters { background: var(--surface); border-bottom: 1px solid var(--border); padding: 1rem 2rem; display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
+.filter-label { font-size: 0.8rem; color: var(--muted); font-family: 'Chakra Petch', sans-serif; margin-right: 0.25rem; }
+.cat-btn { background: var(--surface2); border: 1.5px solid var(--border); color: var(--muted); font-family: 'Sarabun', sans-serif; font-size: 0.85rem; padding: 6px 14px; border-radius: 20px; cursor: pointer; transition: all 0.15s; }
+.cat-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--tag-bg); }
+.cat-btn.active { background: var(--accent); border-color: var(--accent); color: white; font-weight: 600; }
+
+.result-bar { padding: 1rem 2rem; display: flex; align-items: center; }
+.result-count { font-size: 0.85rem; color: var(--muted); font-family: 'Chakra Petch', sans-serif; }
+.result-count span { color: var(--accent); font-weight: 600; }
+
+.grid { padding: 0 2rem 4rem; display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1.25rem; }
+
+.card { background: var(--surface); border: 1.5px solid var(--border); border-radius: 12px; overflow: hidden; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s; box-shadow: var(--shadow); }
+.card:hover { transform: translateY(-4px); box-shadow: var(--shadow-hover); border-color: var(--accent); }
+.card-thumb { width: 100%; aspect-ratio: 4/3; object-fit: cover; display: block; background: var(--surface2); }
+.card-thumb-placeholder { width: 100%; aspect-ratio: 4/3; display: flex; align-items: center; justify-content: center; background: var(--surface2); font-size: 3rem; position: relative; overflow: hidden; }
+.card-overlay { position: absolute; inset: 0; background: rgba(45,106,79,0.85); opacity: 0; transition: opacity 0.2s; display: flex; align-items: center; justify-content: center; gap: 0.75rem; }
+.card:hover .card-overlay { opacity: 1; }
+.overlay-btn { background: rgba(255,255,255,0.15); border: 1.5px solid rgba(255,255,255,0.5); color: white; padding: 8px 16px; border-radius: 6px; font-family: 'Sarabun', sans-serif; font-size: 0.85rem; cursor: pointer; transition: all 0.15s; }
+.overlay-btn:hover { background: rgba(255,255,255,0.3); }
+.overlay-btn.primary { background: var(--accent2); border-color: var(--accent2); color: white; font-weight: 600; }
+.overlay-btn.primary:hover { background: #e09050; }
+.card-body { padding: 0.875rem 1rem; }
+.card-title { font-size: 0.92rem; font-weight: 600; margin-bottom: 0.5rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.card-meta { display: flex; align-items: center; justify-content: space-between; }
+.card-cat { font-size: 0.72rem; background: var(--tag-bg); color: var(--tag-color); padding: 3px 10px; border-radius: 4px; font-weight: 600; }
+.card-dl { font-size: 0.75rem; color: var(--muted); display: flex; align-items: center; gap: 4px; font-family: 'Chakra Petch', sans-serif; }
+
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 999; display: flex; align-items: center; justify-content: center; padding: 1.5rem; opacity: 0; pointer-events: none; transition: opacity 0.25s; backdrop-filter: blur(4px); }
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal { background: var(--surface); border-radius: 16px; max-width: 680px; width: 100%; max-height: 90vh; overflow: auto; transform: scale(0.95) translateY(10px); transition: transform 0.25s; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
+.modal-overlay.open .modal { transform: scale(1) translateY(0); }
+.modal-img { width: 100%; aspect-ratio: 4/3; object-fit: cover; display: block; border-radius: 16px 16px 0 0; }
+.modal-img-placeholder { width: 100%; aspect-ratio: 4/3; display: flex; align-items: center; justify-content: center; font-size: 5rem; background: var(--surface2); border-radius: 16px 16px 0 0; }
+.modal-body { padding: 1.5rem; }
+.modal-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1rem; gap: 1rem; }
+.modal-title { font-size: 1.2rem; font-weight: 700; }
+.modal-close { background: var(--surface2); border: 1.5px solid var(--border); color: var(--muted); width: 34px; height: 34px; border-radius: 8px; cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.15s; }
+.modal-close:hover { background: var(--border); color: var(--text); }
+.modal-meta { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1rem; }
+.meta-chip { display: flex; align-items: center; gap: 5px; font-size: 0.82rem; color: var(--muted); background: var(--surface2); padding: 4px 10px; border-radius: 6px; }
+.modal-desc { font-size: 0.9rem; color: #555; line-height: 1.7; margin-bottom: 1.25rem; }
+.modal-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.5rem; }
+.tag { font-size: 0.75rem; background: var(--tag-bg); color: var(--tag-color); padding: 3px 10px; border-radius: 4px; font-weight: 600; }
+.btn-download { width: 100%; background: var(--accent); border: none; color: white; font-family: 'Sarabun', sans-serif; font-size: 1rem; font-weight: 700; padding: 14px; border-radius: 8px; cursor: pointer; transition: background 0.15s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.btn-download:hover { background: #245a42; }
+
+.empty { grid-column: 1/-1; text-align: center; padding: 5rem 0; color: var(--muted); font-size: 0.9rem; }
+.empty-icon { font-size: 3rem; margin-bottom: 1rem; display: block; }
+.loading { grid-column: 1/-1; text-align: center; padding: 4rem 0; color: var(--muted); }
+.spinner { width: 36px; height: 36px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 1rem; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.admin-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 1.5rem; opacity: 0; pointer-events: none; transition: opacity 0.25s; backdrop-filter: blur(4px); }
+.admin-overlay.open { opacity: 1; pointer-events: all; }
+.admin-panel { background: var(--surface); border-radius: 16px; width: 100%; max-width: 560px; max-height: 92vh; overflow: auto; transform: scale(0.95) translateY(10px); transition: transform 0.25s; box-shadow: 0 20px 60px rgba(0,0,0,0.25); }
+.admin-overlay.open .admin-panel { transform: scale(1) translateY(0); }
+.admin-header { background: var(--accent); padding: 1.25rem 1.5rem; display: flex; align-items: center; justify-content: space-between; border-radius: 16px 16px 0 0; }
+.admin-header h2 { color: white; font-size: 1.1rem; font-weight: 700; font-family: 'Chakra Petch', sans-serif; }
+.admin-close { background: rgba(255,255,255,0.15); border: none; color: white; width: 32px; height: 32px; border-radius: 6px; cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; }
+.admin-close:hover { background: rgba(255,255,255,0.25); }
+.admin-body { padding: 1.5rem; }
+.admin-tabs { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; background: var(--surface2); padding: 4px; border-radius: 8px; }
+.admin-tab { flex: 1; background: none; border: none; font-family: 'Sarabun', sans-serif; font-size: 0.78rem; padding: 8px 4px; border-radius: 6px; cursor: pointer; color: var(--muted); transition: all 0.15s; }
+.admin-tab.active { background: white; color: var(--accent); font-weight: 600; box-shadow: var(--shadow); }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+.form-group { margin-bottom: 1.1rem; }
+.form-label { display: block; font-size: 0.85rem; font-weight: 600; color: var(--text); margin-bottom: 0.4rem; }
+.form-label span { color: #e76f51; }
+.form-input, .form-select, .form-textarea { width: 100%; background: var(--surface2); border: 1.5px solid var(--border); color: var(--text); font-family: 'Sarabun', sans-serif; font-size: 0.95rem; padding: 10px 12px; border-radius: 8px; outline: none; transition: border-color 0.2s; }
+.form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--accent); background: white; }
+.form-textarea { resize: vertical; min-height: 80px; }
+
+.upload-zone { border: 2px dashed var(--border); border-radius: 10px; padding: 2rem; text-align: center; cursor: pointer; transition: all 0.2s; background: var(--surface2); position: relative; }
+.upload-zone:hover, .upload-zone.drag-over { border-color: var(--accent); background: var(--tag-bg); }
+.upload-zone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+.upload-icon { font-size: 2.5rem; margin-bottom: 0.5rem; display: block; }
+.upload-text { font-size: 0.9rem; color: var(--muted); }
+.upload-text strong { color: var(--accent); }
+.upload-preview { margin-top: 1rem; border-radius: 8px; overflow: hidden; display: none; }
+.upload-preview img { width: 100%; max-height: 200px; object-fit: cover; display: block; }
+.upload-preview.show { display: block; }
+
+.progress-wrap { margin-top: 1rem; display: none; }
+.progress-wrap.show { display: block; }
+.progress-bar-bg { background: var(--border); border-radius: 20px; height: 8px; overflow: hidden; }
+.progress-bar-fill { background: var(--accent); height: 100%; border-radius: 20px; transition: width 0.3s; width: 0%; }
+.progress-text { font-size: 0.8rem; color: var(--muted); margin-top: 0.4rem; text-align: center; }
+
+.btn-submit { width: 100%; background: var(--accent); border: none; color: white; font-family: 'Sarabun', sans-serif; font-size: 1rem; font-weight: 700; padding: 13px; border-radius: 8px; cursor: pointer; transition: background 0.15s; margin-top: 0.5rem; }
+.btn-submit:hover { background: #245a42; }
+.btn-submit:disabled { background: var(--border); color: var(--muted); cursor: not-allowed; }
+
+.manage-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: var(--surface2); border: 1.5px solid var(--border); border-radius: 8px; margin-bottom: 0.75rem; }
+.manage-thumb { width: 56px; height: 56px; border-radius: 6px; object-fit: cover; flex-shrink: 0; background: var(--border); }
+.manage-info { flex: 1; min-width: 0; }
+.manage-name { font-size: 0.88rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.manage-cat { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
+.btn-delete { background: #fef0ee; border: 1.5px solid #fbd0c8; color: var(--accent3); padding: 6px 12px; border-radius: 6px; font-family: 'Sarabun', sans-serif; font-size: 0.82rem; cursor: pointer; flex-shrink: 0; transition: all 0.15s; }
+.btn-delete:hover { background: var(--accent3); color: white; border-color: var(--accent3); }
+
+.toast { position: fixed; bottom: 2rem; right: 2rem; color: white; font-weight: 600; font-size: 0.9rem; padding: 12px 20px; border-radius: 8px; z-index: 9999; transform: translateY(80px); opacity: 0; transition: all 0.3s; font-family: 'Sarabun', sans-serif; max-width: 320px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast.success { background: var(--accent); }
+.toast.error { background: var(--accent3); }
+
+@media (max-width: 640px) {
+  header { padding: 0 1rem; }
+  .hero { padding: 2.5rem 1rem 2rem; }
+  .filters { padding: 0.875rem 1rem; }
+  .grid { padding: 0 1rem 3rem; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 0.875rem; }
+}
+.pw-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1100; display: flex; align-items: center; justify-content: center; padding: 1.5rem; opacity: 0; pointer-events: none; transition: opacity 0.25s; backdrop-filter: blur(6px); }
+.pw-overlay.open { opacity: 1; pointer-events: all; }
+.pw-box { background: var(--surface); border-radius: 16px; padding: 2rem; width: 100%; max-width: 360px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); transform: scale(0.95); transition: transform 0.25s; text-align: center; }
+.pw-overlay.open .pw-box { transform: scale(1); }
+.pw-icon { font-size: 2.5rem; margin-bottom: 0.75rem; display: block; }
+.pw-title { font-family: 'Chakra Petch', sans-serif; font-size: 1.1rem; font-weight: 700; margin-bottom: 0.25rem; }
+.pw-sub { font-size: 0.85rem; color: var(--muted); margin-bottom: 1.25rem; }
+.pw-input-wrap { position: relative; margin-bottom: 0.5rem; }
+.pw-input { width: 100%; background: var(--surface2); border: 1.5px solid var(--border); color: var(--text); font-family: 'Sarabun', sans-serif; font-size: 1rem; padding: 11px 44px 11px 14px; border-radius: 8px; outline: none; transition: border-color 0.2s; letter-spacing: 0.1em; }
+.pw-input:focus { border-color: var(--accent); background: white; }
+.pw-input.shake { animation: shake 0.4s; }
+@keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)} }
+.pw-toggle { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--muted); font-size: 1.1rem; padding: 0; }
+.pw-error { font-size: 0.82rem; color: var(--accent3); margin-bottom: 0.75rem; min-height: 1.2em; }
+.pw-btn { width: 100%; background: var(--accent); border: none; color: white; font-family: 'Sarabun', sans-serif; font-size: 1rem; font-weight: 700; padding: 12px; border-radius: 8px; cursor: pointer; transition: background 0.15s; }
+.pw-btn:hover { background: #245a42; }
+.pw-cancel { margin-top: 0.75rem; background: none; border: none; color: var(--muted); font-family: 'Sarabun', sans-serif; font-size: 0.85rem; cursor: pointer; display: block; width: 100%; text-align: center; padding: 4px; }
+.pw-cancel:hover { color: var(--text); }
+.btn-lang { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.4); color: white; font-family: 'Chakra Petch', sans-serif; font-size: 0.8rem; font-weight: 700; padding: 5px 12px; border-radius: 6px; cursor: pointer; transition: all 0.15s; letter-spacing: 0.05em; }
+.btn-lang:hover { background: rgba(255,255,255,0.28); }
+
+.subject-bar { background: #eaf2ee; border-bottom: 1px solid var(--border); padding: 0.75rem 2rem; display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
+.subj-btn { background: white; border: 1.5px solid var(--border); color: var(--muted); font-family: 'Sarabun', sans-serif; font-size: 0.82rem; padding: 5px 12px; border-radius: 20px; cursor: pointer; transition: all 0.15s; }
+.subj-btn:hover { border-color: var(--accent); color: var(--accent); }
+.subj-btn.active { background: var(--accent); border-color: var(--accent); color: white; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo" id="siteLogo">คลัง<span>ใบงาน</span></div>
+  <div class="header-actions">
+    <div class="stats-badge" id="total-downloads">↓ 0 ครั้ง</div>
+    <a href="/qr-generator.html" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:white;font-family:'Sarabun',sans-serif;font-size:0.82rem;padding:6px 12px;border-radius:6px;text-decoration:none;transition:all 0.15s" onmouseover="this.style.background='rgba(255,255,255,0.25)'" onmouseout="this.style.background='rgba(255,255,255,0.15)'">🔲 QR Code</a>
+    <button class="btn-lang" id="langToggle" onclick="toggleLang()">EN</button>
+    <button class="btn-admin" id="btnAdmin" onclick="openAdmin()">⚙️ จัดการใบงาน</button>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="hero-content">
+    <h1>คลังใบงาน<br><em>ฟรี</em> สำหรับทุกคน</h1>
+    <p>ดาวน์โหลดใบงานคุณภาพสูง ฟรี สำหรับทุกระดับชั้น อนุบาล–ประถม</p>
+    <div class="search-wrap">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input class="search-input" type="text" id="search" placeholder="ค้นหาใบงาน เช่น คณิตศาสตร์, ระบายสี...">
+    </div>
+  </div>
+</div>
+
+<div class="filters" id="categoryBar">
+  <span class="filter-label">หมวดหมู่:</span>
+  <button class="cat-btn active" data-cat="all" onclick="filterCat('all',this)">ทั้งหมด</button>
+  <span id="categoryBtns"></span>
+</div>
+<div class="subject-bar" id="subjectBar" style="display:none">
+  <span class="filter-label">📚 วิชา:</span>
+  <button class="subj-btn active" data-subj="all" onclick="filterSubject('all',this)">ทั้งหมด</button>
+  <span id="subjectBtns"></span>
+</div>
+
+<div class="result-bar">
+  <div class="result-count">พบ <span id="result-num">0</span> รายการ</div>
+</div>
+
+<div class="grid" id="grid">
+  <div class="loading"><div class="spinner"></div>กำลังโหลดใบงาน...</div>
+</div>
+
+<!-- VIEW MODAL -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div id="modal-img-wrap"></div>
+    <div class="modal-body">
+      <div class="modal-header">
+        <div class="modal-title" id="modal-title"></div>
+        <button class="modal-close" onclick="closeModal()">✕</button>
+      </div>
+      <div class="modal-meta" id="modal-meta"></div>
+      <div class="modal-desc" id="modal-desc"></div>
+      <div class="modal-tags" id="modal-tags"></div>
+      <div id="modalDlButtons"></div>
+      <canvas id="bwCanvas" style="display:none"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN PANEL -->
+<div class="admin-overlay" id="adminPanel">
+  <div class="admin-panel">
+    <div class="admin-header">
+      <h2>⚙️ จัดการใบงาน</h2>
+      <button class="admin-close" onclick="closeAdmin()">✕</button>
+    </div>
+    <div class="admin-body">
+      <div class="admin-tabs">
+        <button class="admin-tab active" onclick="switchTab('upload')">📤 อัปโหลด</button>
+        <button class="admin-tab" onclick="switchTab('manage')">📋 ใบงาน</button>
+        <button class="admin-tab" onclick="switchTab('subjects')">📚 วิชา</button>
+        <button class="admin-tab" onclick="switchTab('categories')">🏷️ หมวดหมู่</button>
+      </div>
+
+      <div class="tab-content active" id="tab-upload">
+        <div class="form-group">
+          <label class="form-label">ชื่อใบงาน (ภาษาไทย) <span>*</span></label>
+          <input class="form-input" type="text" id="ws-title" placeholder="เช่น ใบงานระบายสีสัตว์">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Worksheet Name (English) <span style="color:var(--muted);font-weight:400">(optional)</span></label>
+          <input class="form-input" type="text" id="ws-title-en" placeholder="e.g. Animal Coloring Worksheet">
+        </div>
+        <div class="form-group">
+          <label class="form-label">หมวดหมู่ <span>*</span></label>
+          <select class="form-select" id="ws-cat"><option value="">-- เลือกหมวดหมู่ --</option></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">วิชา</label>
+          <select class="form-select" id="ws-subj">
+            <option value="">-- เลือกวิชา (ถ้ามี) --</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">คำอธิบาย (ภาษาไทย)</label>
+          <textarea class="form-textarea" id="ws-desc" placeholder="อธิบายใบงานสั้นๆ เช่น ฝึกระบายสีรูปสัตว์ต่างๆ พัฒนาทักษะสร้างสรรค์"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Description (English)</label>
+          <textarea class="form-textarea" id="ws-desc-en" placeholder="e.g. Practice coloring various animals to develop creative skills"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">แท็ก <span style="color:var(--muted);font-weight:400">(คั่นด้วยจุลภาค)</span></label>
+          <input class="form-input" type="text" id="ws-tags" placeholder="เช่น ระบายสี, สัตว์, สนุก">
+        </div>
+        <div class="form-group">
+          <label class="form-label">🎨 ไฟล์แบบสี <span>*</span></label>
+          <div class="upload-zone" id="uploadZone">
+            <input type="file" id="ws-file" accept="image/*" onchange="previewFile(this,'uploadPreview','previewImg')">
+            <span class="upload-icon">🖼️</span>
+            <div class="upload-text">
+              <strong>คลิกหรือลากไฟล์มาวางที่นี่</strong><br>
+              รองรับ JPG, PNG ขนาดไม่เกิน 10MB
+            </div>
+            <div class="upload-preview" id="uploadPreview">
+              <img id="previewImg" src="" alt="">
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">🖍️ ไฟล์แบบระบายสี <span style="color:var(--muted);font-weight:400">(ถ้ามี)</span></label>
+          <div class="upload-zone" id="uploadZone2">
+            <input type="file" id="ws-file-coloring" accept="image/*" onchange="previewFile(this,'uploadPreview2','previewImg2')">
+            <span class="upload-icon">🖍️</span>
+            <div class="upload-text">
+              <strong>คลิกหรือลากไฟล์มาวางที่นี่</strong><br>
+              ไฟล์เส้นขอบสำหรับให้เด็กระบายสี
+            </div>
+            <div class="upload-preview" id="uploadPreview2">
+              <img id="previewImg2" src="" alt="">
+            </div>
+          </div>
+        </div>
+        <div class="progress-wrap" id="progressWrap">
+          <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressFill"></div></div>
+          <div class="progress-text" id="progressText">กำลังอัปโหลด...</div>
+        </div>
+        <button class="btn-submit" id="btnSubmit" onclick="uploadWorksheet()">📤 อัปโหลดใบงาน</button>
+      </div>
+
+        <div class="tab-content" id="tab-manage">
+        <div id="manageList">
+          <div class="loading"><div class="spinner"></div>กำลังโหลด...</div>
+        </div>
+      </div>
+
+      <div class="tab-content" id="tab-subjects">
+        <div class="form-group">
+          <label class="form-label">เลือกระดับชั้น <span>*</span></label>
+          <select class="form-select" id="subj-cat"><option value="">-- เลือกระดับชั้น --</option></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">ชื่อวิชา (ภาษาไทย) <span>*</span></label>
+          <input class="form-input" type="text" id="subj-name" placeholder="เช่น ศิลปะ, คณิตศาสตร์, ภาษาไทย">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Subject Name (English)</label>
+          <div style="display:flex;gap:0.5rem">
+            <input class="form-input" type="text" id="subj-name-en" placeholder="e.g. Art, Mathematics, Thai Language" style="flex:1" onkeydown="if(event.key==='Enter')addSubject()">
+            <button class="btn-submit" style="width:auto;padding:10px 20px;margin:0" onclick="addSubject()">+ เพิ่ม</button>
+          </div>
+        </div>
+        <div style="margin-top:1rem">
+          <div style="font-size:0.85rem;font-weight:600;margin-bottom:0.75rem;color:var(--text)">วิชาที่มีอยู่ทั้งหมด:</div>
+          <div id="subjectManageList"><div style="color:var(--muted);font-size:0.85rem">กำลังโหลด...</div></div>
+        </div>
+      </div>
+      <div class="tab-content" id="tab-categories">
+        <div class="form-group">
+          <label class="form-label">ชื่อหมวดหมู่ (ภาษาไทย) <span>*</span></label>
+          <input class="form-input" type="text" id="cat-name" placeholder="เช่น อนุบาล 1, ป.1">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Category Name (English)</label>
+          <div style="display:flex;gap:0.5rem">
+            <input class="form-input" type="text" id="cat-name-en" placeholder="e.g. Kindergarten 1, Grade 1" style="flex:1" onkeydown="if(event.key==='Enter')addCategory()">
+            <button class="btn-submit" style="width:auto;padding:10px 20px;margin:0" onclick="addCategory()">+ เพิ่ม</button>
+          </div>
+        </div>
+        <div style="margin-top:1rem">
+          <div style="font-size:0.85rem;font-weight:600;margin-bottom:0.75rem;color:var(--text)">หมวดหมู่ทั้งหมด:</div>
+          <div id="categoryManageList"><div style="color:var(--muted);font-size:0.85rem;text-align:center;padding:1rem">กำลังโหลด...</div></div>
+        </div>
+      </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PASSWORD MODAL -->
+<div class="pw-overlay" id="pwOverlay">
+  <div class="pw-box">
+    <span class="pw-icon">🔐</span>
+    <div class="pw-title">ยืนยันตัวตน</div>
+    <div class="pw-sub">กรุณาใส่รหัสผ่านเพื่อเข้าจัดการใบงาน</div>
+    <div class="pw-input-wrap">
+      <input class="pw-input" type="password" id="pwInput" placeholder="รหัสผ่าน" onkeydown="if(event.key==='Enter')checkPassword()">
+      <button class="pw-toggle" onclick="togglePw()" id="pwToggle">👁️</button>
+    </div>
+    <div class="pw-error" id="pwError"></div>
+    <button class="pw-btn" onclick="checkPassword()">🔓 เข้าสู่ระบบ</button>
+    <button class="pw-cancel" onclick="closePwModal()">ยกเลิก</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SUPABASE_URL = 'https://fuqfrltgvmlhpfeibykt.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1cWZybHRndm1saHBmZWlieWt0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgyMTk1MDgsImV4cCI6MjA5Mzc5NTUwOH0.dbISrh-tRn8aorHf85Ehy4y5O7p652EmKqkv9-J0LfA';
+const BUCKET = 'worksheets';
+const { createClient } = supabase;
+const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let allWorksheets = [];
+let allSubjects = [];
+let allCategories = [];
+let currentCat = 'all';
+let currentSubj = 'all';
+let currentSearch = '';
+let currentItem = null;
+
+async function init() {
+  detectLang();
+  try { await loadCategories(); } catch(e) { console.warn('cat error', e); }
+  try { await loadSubjects(); } catch(e) { console.warn('subj error', e); }
+  await loadWorksheets();
+  applyLang();
+}
+
+async function loadWorksheets() {
+  try {
+    const { data, error } = await sb.from('worksheets').select('*').order('created_at', { ascending: false });
+    if (error) throw error;
+    allWorksheets = data || [];
+    updateTotalDownloads();
+    renderGrid();
+  } catch(e) {
+    document.getElementById('grid').innerHTML = `<div class="empty"><span class="empty-icon">⚠️</span>ไม่สามารถโหลดข้อมูลได้<br><small style="color:var(--muted)">${e.message}</small></div>`;
+  }
+}
+
+
+
+async function loadCategories() {
+  try {
+    const res = await sb.from('categories').select('*').order('sort_order').order('name');
+    if (res.error) {
+      console.warn('categories table error:', res.error.message);
+      allCategories = [];
+    } else {
+      allCategories = res.data || [];
+    }
+    renderCategoryBar();
+    updateCategorySelects();
+  } catch(e) {
+    console.warn('loadCategories failed:', e.message);
+    allCategories = [];
+  }
+}
+
+function renderCategoryBar() {
+  const el = document.getElementById('categoryBtns');
+  el.innerHTML = allCategories.map(c => {
+    const label = (currentLang==='en' && c.name_en) ? c.name_en : c.name;
+    return `<button class="cat-btn${currentCat===c.name?' active':''}" data-cat="${c.name}" onclick="filterCat('${c.name}',this)">${c.emoji||''} ${label}</button>`;
+  }).join('');
+}
+
+function filterCat(cat, btn) {
+  currentCat = cat;
+  currentSubj = 'all';
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderSubjectBar();
+  renderGrid();
+}
+
+function updateCategorySelects() {
+  const opts = '<option value="">-- เลือกหมวดหมู่ --</option>' +
+    allCategories.map(c => `<option value="${c.name}">${c.emoji||''} ${c.name}</option>`).join('');
+  const wsCat = document.getElementById('ws-cat');
+  const subjCat = document.getElementById('subj-cat');
+  if(wsCat) wsCat.innerHTML = opts;
+  if(subjCat) subjCat.innerHTML = opts.replace('เลือกหมวดหมู่','เลือกระดับชั้น');
+}
+
+async function addCategory() {
+  const name = document.getElementById('cat-name').value.trim();
+  const nameEn = document.getElementById('cat-name-en').value.trim();
+  if (!name) { showToast('กรุณากรอกชื่อหมวดหมู่', 'error'); return; }
+  if (allCategories.find(c => c.name === name)) { showToast('หมวดหมู่นี้มีอยู่แล้ว', 'error'); return; }
+  try {
+    const res = await sb.from('categories').insert({ name: String(name), name_en: nameEn||null, sort_order: allCategories.length }).select();
+    if (res.error) throw res.error;
+    document.getElementById('cat-name').value = '';
+    document.getElementById('cat-name-en').value = '';
+    showToast('✓ เพิ่มหมวดหมู่ "' + name + '" สำเร็จ', 'success');
+    await loadCategories();
+    renderCategoryManageList();
+  } catch(e) { showToast('เกิดข้อผิดพลาด: ' + (e.message||'กรุณาลองใหม่'), 'error'); }
+}
+
+async function editCategory(id, oldName) {
+  const newName = prompt('แก้ไขชื่อหมวดหมู่:', oldName);
+  if (!newName || newName === oldName) return;
+  try {
+    const res = await sb.from('categories').update({ name: String(newName) }).eq('id', String(id)).select();
+    if (res.error) throw res.error;
+    // Update worksheets and subjects that use this category
+    await sb.from('worksheets').update({ category: String(newName) }).eq('category', String(oldName));
+    await sb.from('subjects').update({ category: String(newName) }).eq('category', String(oldName));
+    showToast('✓ แก้ไขเป็น "' + newName + '" สำเร็จ', 'success');
+    await loadCategories();
+    await loadSubjects();
+    await loadWorksheets();
+    renderCategoryManageList();
+  } catch(e) { showToast('เกิดข้อผิดพลาด: ' + (e.message||'กรุณาลองใหม่'), 'error'); }
+}
+
+async function deleteCategory(id, name) {
+  if (!confirm('ลบหมวดหมู่ "' + name + '" ใช่หรือไม่?\nใบงานในหมวดหมู่นี้จะยังคงอยู่')) return;
+  try {
+    const res = await sb.from('categories').delete().eq('id', String(id));
+    if (res.error) throw res.error;
+    showToast('✓ ลบหมวดหมู่ "' + name + '" สำเร็จ', 'success');
+    await loadCategories();
+    renderCategoryManageList();
+  } catch(e) { showToast('เกิดข้อผิดพลาด: ' + (e.message||'กรุณาลองใหม่'), 'error'); }
+}
+
+function renderCategoryManageList() {
+  const el = document.getElementById('categoryManageList');
+  if (!allCategories.length) {
+    el.innerHTML = '<div style="color:var(--muted);font-size:0.85rem;text-align:center;padding:1rem">ยังไม่มีหมวดหมู่ กรอกด้านบนเพื่อเพิ่ม</div>';
+    return;
+  }
+  el.innerHTML = allCategories.map(c => `
+    <div class="manage-item">
+      <div class="manage-info">
+        <div class="manage-name">${c.emoji||'🏷️'} ${c.name}</div>
+        <div class="manage-cat">${allWorksheets.filter(w=>w.category===c.name).length} ใบงาน</div>
+      </div>
+      <div style="display:flex;gap:0.4rem">
+        <button onclick="editCategory('${c.id}','${c.name}')" style="background:#eaf2ee;border:1.5px solid #b7dcc8;color:var(--accent);padding:6px 10px;border-radius:6px;font-size:0.82rem;cursor:pointer;font-family:'Sarabun',sans-serif">✏️ แก้ไข</button>
+        <button class="btn-delete" onclick="deleteCategory('${c.id}','${c.name}')">🗑️ ลบ</button>
+      </div>
+    </div>`).join('');
+}
+
+async function loadSubjects() {
+  try {
+    const { data } = await sb.from('subjects').select('*').order('category').order('name');
+    allSubjects = data || [];
+  } catch(e) { allSubjects = []; }
+}
+
+async function addSubject() {
+  const cat = document.getElementById('subj-cat').value;
+  const name = document.getElementById('subj-name').value.trim();
+  const nameEn = document.getElementById('subj-name-en').value.trim();
+  if (!cat) { showToast('กรุณาเลือกระดับชั้น', 'error'); return; }
+  if (!name) { showToast('กรุณากรอกชื่อวิชา', 'error'); return; }
+  if (allSubjects.find(s => s.category === cat && s.name === name)) {
+    showToast('วิชานี้มีอยู่แล้ว', 'error'); return;
+  }
+  try {
+    const res = await sb.from('subjects').insert({ category: String(cat), name: String(name), name_en: nameEn||null }).select();
+    if (res.error) throw res.error;
+    document.getElementById('subj-name').value = '';
+    document.getElementById('subj-name-en').value = '';
+    showToast('✓ เพิ่มวิชา "' + name + '" ให้ ' + cat + ' สำเร็จ', 'success');
+    await loadSubjects();
+    renderSubjectManageList();
+    renderSubjectBar();
+    updateUploadSubjectSelect();
+  } catch(e) {
+    showToast('เกิดข้อผิดพลาด: ' + (e.message || 'กรุณาลองใหม่'), 'error');
+  }
+}
+
+async function deleteSubject(id, name) {
+  if (!confirm('ลบวิชา "' + name + '" ใช่หรือไม่?')) return;
+  try {
+    const res = await sb.from('subjects').delete().eq('id', String(id));
+    if (res.error) throw res.error;
+    showToast('✓ ลบวิชา "' + name + '" สำเร็จ', 'success');
+    await loadSubjects();
+    renderSubjectManageList();
+    renderSubjectBar();
+    updateUploadSubjectSelect();
+  } catch(e) {
+    showToast('เกิดข้อผิดพลาด: ' + (e.message || 'กรุณาลองใหม่'), 'error');
+  }
+}
+
+function renderSubjectManageList() {
+  const el = document.getElementById('subjectManageList');
+  if (!allSubjects.length) {
+    el.innerHTML = '<div style="color:var(--muted);font-size:0.85rem;text-align:center;padding:1rem">ยังไม่มีวิชา กรอกด้านบนเพื่อเพิ่ม</div>';
+    return;
+  }
+  // Group by category
+  const grouped = {};
+  allSubjects.forEach(s => {
+    if (!grouped[s.category]) grouped[s.category] = [];
+    grouped[s.category].push(s);
+  });
+  el.innerHTML = Object.entries(grouped).map(([cat, subjects]) => `
+    <div style="margin-bottom:1rem">
+      <div style="font-size:0.78rem;font-weight:700;color:var(--accent);margin-bottom:0.4rem;font-family:'Chakra Petch',monospace">${cat}</div>
+      <div style="display:flex;flex-wrap:wrap;gap:0.4rem">
+        ${subjects.map(s => `
+          <div style="display:flex;align-items:center;gap:4px;background:var(--tag-bg);border:1.5px solid var(--border);padding:4px 10px;border-radius:20px">
+            <span style="font-size:0.82rem;font-weight:600;color:var(--accent)">${s.name}</span>
+            <button onclick="deleteSubject('${s.id}','${s.name}')" style="background:none;border:none;cursor:pointer;color:#e76f51;font-size:0.9rem;padding:0;line-height:1">×</button>
+          </div>`).join('')}
+      </div>
+    </div>`).join('');
+}
+
+function renderSubjectBar() {
+  const bar = document.getElementById('subjectBar');
+  const btns = document.getElementById('subjectBtns');
+  if (currentCat === 'all') {
+    bar.style.display = 'none';
+    currentSubj = 'all';
+    return;
+  }
+  const subjects = allSubjects.filter(s => s.category === currentCat);
+  if (!subjects.length) {
+    bar.style.display = 'none';
+    currentSubj = 'all';
+    return;
+  }
+  bar.style.display = 'flex';
+  btns.innerHTML = subjects.map(s => {
+    const label = (currentLang==='en' && s.name_en) ? s.name_en : s.name;
+    return `<button class="subj-btn${currentSubj===s.name?' active':''}" data-subj="${s.name}" onclick="filterSubject('${s.name}',this)">${label}</button>`;
+  }).join('');
+}
+
+function filterSubject(subj, btn) {
+  currentSubj = subj;
+  document.querySelectorAll('.subj-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderGrid();
+}
+
+function updateUploadSubjectSelect() {
+  const cat = document.getElementById('ws-cat').value;
+  const sel = document.getElementById('ws-subj');
+  const subjects = allSubjects.filter(s => s.category === cat);
+  sel.innerHTML = '<option value="">-- เลือกวิชา (ถ้ามี) --</option>' +
+    subjects.map(s => `<option value="${s.name}">${s.name}</option>`).join('');
+}
+
+function renderGrid() {
+  const grid = document.getElementById('grid');
+  const query = currentSearch.toLowerCase();
+  const filtered = allWorksheets.filter(w => {
+    const matchCat = currentCat === 'all' || w.category === currentCat;
+    const matchSubj = currentSubj === 'all' || w.subject === currentSubj;
+    const matchSearch = !query || w.title.toLowerCase().includes(query) || w.category.toLowerCase().includes(query) || (w.tags && w.tags.some(t => t.toLowerCase().includes(query)));
+    return matchCat && matchSubj && matchSearch;
+  });
+  document.getElementById('result-num').textContent = filtered.length;
+  document.querySelector('.result-count').innerHTML = t('foundLabel') + ' <span id="result-num">' + filtered.length + '</span> ' + t('foundUnit');
+  if (!filtered.length) {
+    grid.innerHTML = `<div class="empty"><span class="empty-icon">📭</span>${t("emptyText")}</div>`;
+    return;
+  }
+  grid.innerHTML = filtered.map(w => `
+    <div class="card" onclick="openModal('${w.id}')">
+      <div style="position:relative">
+        ${w.image_url ? `<img class="card-thumb" src="${w.image_url}" alt="${w.title}" loading="lazy">` : `<div class="card-thumb-placeholder">📄</div>`}
+        <div class="card-overlay">
+          <button class="overlay-btn" onclick="event.stopPropagation();openModal('${w.id}')">ดูรายละเอียด</button>
+          <button class="overlay-btn primary" onclick="event.stopPropagation();openModal('${w.id}')">↓ ดาวน์โหลด</button>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="card-title">${currentLang==='en'&&w.title_en ? w.title_en : w.title}</div>
+        <div class="card-meta">
+          <span class="card-cat">${(() => {
+            const cat = allCategories.find(c=>c.name===w.category);
+            const catLabel = currentLang==='en'&&cat&&cat.name_en ? cat.name_en : w.category;
+            if (!w.subject) return catLabel;
+            const subj = allSubjects.find(s=>s.name===w.subject);
+            const subjLabel = currentLang==='en'&&subj&&subj.name_en ? subj.name_en : w.subject;
+            return catLabel + ' · ' + subjLabel;
+          })()}</span>
+          <span class="card-dl">↓ ${(w.download_count||0).toLocaleString()}</span>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function updateTotalDownloads() {
+  const total = allWorksheets.reduce((s,w) => s+(w.download_count||0), 0);
+  document.getElementById('total-downloads').textContent = '↓ ' + total.toLocaleString() + ' ' + t('downloadCount');
+}
+
+function openModal(id) {
+  currentItem = allWorksheets.find(w => w.id == id);
+  if (!currentItem) return;
+  document.getElementById('modal-img-wrap').innerHTML = currentItem.image_url
+    ? `<img class="modal-img" src="${currentItem.image_url}" alt="${currentItem.title}">`
+    : `<div class="modal-img-placeholder">📄</div>`;
+  document.getElementById('modal-title').textContent = currentLang==='en'&&currentItem.title_en ? currentItem.title_en : currentItem.title;
+  document.getElementById('modal-meta').innerHTML = `<div class="meta-chip">📁 ${currentItem.category}</div>${currentItem.subject?`<div class="meta-chip">📚 ${currentItem.subject}</div>`:''}<div class="meta-chip">↓ ${(currentItem.download_count||0).toLocaleString()} ครั้ง</div>`;
+  document.getElementById('modal-desc').textContent = (currentLang==='en'&&currentItem.description_en ? currentItem.description_en : currentItem.description) || '';
+  document.getElementById('modal-tags').innerHTML = currentItem.tags ? currentItem.tags.map(t=>`<span class="tag">#${t}</span>`).join('') : '';
+  // Render download buttons
+  const hasBoth = currentItem.coloring_url;
+  document.getElementById('modalDlButtons').innerHTML = hasBoth
+    ? `<div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem">
+        <button class="btn-download" onclick="downloadCurrent('color')" style="background:var(--accent)">🎨 แบบสี</button>
+        <button class="btn-download" onclick="downloadCurrent('coloring')" style="background:#e07b39">🖍️ แบบระบายสี</button>
+       </div>`
+    : `<button class="btn-download" onclick="downloadCurrent('color')" style="background:var(--accent)">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        ดาวน์โหลดใบงานฟรี
+       </button>`;
+  document.getElementById('modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+async function downloadCurrent(mode) { if (currentItem) await doDownload(currentItem, mode||'color'); }
+async function quickDownload(id) { const item = allWorksheets.find(w=>w.id==id); if(item) await doDownload(item,'color'); }
+
+async function doDownload(item, mode) {
+  if (!item.image_url) return;
+
+  async function triggerDownload(url, filename) {
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+    } catch(e) {
+      window.open(url, '_blank');
+    }
+  }
+
+  if (mode === 'coloring') {
+    if (item.coloring_url) {
+      await triggerDownload(item.coloring_url, item.title + '_ระบายสี.png');
+      showToast('✓ ดาวน์โหลดแบบระบายสีสำเร็จ!', 'success');
+    } else {
+      showToast('ไม่มีไฟล์แบบระบายสีสำหรับใบงานนี้', 'error');
+      return;
+    }
+  } else {
+    const ext = item.image_url.split('.').pop().split('?')[0] || 'png';
+    await triggerDownload(item.image_url, item.title + '.' + ext);
+    showToast('✓ กำลังดาวน์โหลด "' + item.title + '"', 'success');
+  }
+
+  // Update download count
+  const newCount = (item.download_count || 0) + 1;
+  item.download_count = newCount;
+  updateTotalDownloads();
+  renderGrid();
+  if (currentItem && currentItem.id === item.id) {
+    document.getElementById('modal-meta').innerHTML =
+      '<div class="meta-chip">📁 ' + item.category + '</div>' +
+      (item.subject ? '<div class="meta-chip">📚 ' + item.subject + '</div>' : '') +
+      '<div class="meta-chip">↓ ' + newCount.toLocaleString() + ' ครั้ง</div>';
+  }
+  await sb.from('worksheets').update({ download_count: newCount }).eq('id', item.id);
+}
+
+
+
+// ==================== i18n ====================
+const TRANSLATIONS = {
+  th: {
+    siteTitle: 'คลังใบงาน',
+    logoMain: 'คลัง',
+    logoSub: 'ใบงาน',
+    heroTitle: 'คลังใบงาน<br><em>ฟรี</em> สำหรับทุกคน',
+    heroSub: 'ดาวน์โหลดใบงานคุณภาพสูง ฟรี สำหรับทุกระดับชั้น อนุบาล–ประถม',
+    searchPlaceholder: 'ค้นหาใบงาน เช่น คณิตศาสตร์, ระบายสี...',
+    categoryLabel: 'หมวดหมู่:',
+    subjectLabel: '📚 วิชา:',
+    allLabel: 'ทั้งหมด',
+    foundLabel: 'พบ',
+    foundUnit: 'รายการ',
+    downloadCount: 'ครั้ง',
+    btnAdmin: '⚙️ จัดการใบงาน',
+    btnDownloadFree: '📥 ดาวน์โหลดใบงานฟรี',
+    btnColor: '🎨 แบบสี',
+    btnColoring: '🖍️ แบบระบายสี',
+    emptyText: 'ไม่พบใบงานที่ค้นหา',
+    loadingText: 'กำลังโหลดใบงาน...',
+    adminTitle: '⚙️ จัดการใบงาน',
+    tabUpload: '📤 อัปโหลด',
+    tabManage: '📋 ใบงาน',
+    tabSubjects: '📚 วิชา',
+    tabCategories: '🏷️ หมวดหมู่',
+    pwTitle: 'ยืนยันตัวตน',
+    pwSub: 'กรุณาใส่รหัสผ่านเพื่อเข้าจัดการใบงาน',
+    pwPlaceholder: 'รหัสผ่าน',
+    pwBtn: '🔓 เข้าสู่ระบบ',
+    pwCancel: 'ยกเลิก',
+    pwError: '❌ รหัสผ่านไม่ถูกต้อง กรุณาลองใหม่',
+  },
+  en: {
+    siteTitle: 'Worksheet Gallery',
+    logoMain: 'Free',
+    logoSub: 'Worksheets',
+    heroTitle: 'Free Worksheets<br>for <em>Everyone</em>',
+    heroSub: 'Download high-quality worksheets for free — Kindergarten to Primary level',
+    searchPlaceholder: 'Search worksheets e.g. math, coloring...',
+    categoryLabel: 'Category:',
+    subjectLabel: '📚 Subject:',
+    allLabel: 'All',
+    foundLabel: 'Found',
+    foundUnit: 'items',
+    downloadCount: 'downloads',
+    btnAdmin: '⚙️ Manage',
+    btnDownloadFree: '📥 Download Free',
+    btnColor: '🎨 Color Version',
+    btnColoring: '🖍️ Coloring Page',
+    emptyText: 'No worksheets found',
+    loadingText: 'Loading worksheets...',
+    adminTitle: '⚙️ Manage Worksheets',
+    tabUpload: '📤 Upload',
+    tabManage: '📋 Worksheets',
+    tabSubjects: '📚 Subjects',
+    tabCategories: '🏷️ Categories',
+    pwTitle: 'Authentication',
+    pwSub: 'Please enter password to manage worksheets',
+    pwPlaceholder: 'Password',
+    pwBtn: '🔓 Login',
+    pwCancel: 'Cancel',
+    pwError: '❌ Wrong password. Please try again.',
+  }
+};
+
+let currentLang = 'th';
+
+function detectLang() {
+  const browserLang = navigator.language || navigator.userLanguage || 'th';
+  currentLang = browserLang.toLowerCase().startsWith('th') ? 'th' : 'en';
+}
+
+function t(key) {
+  return TRANSLATIONS[currentLang][key] || TRANSLATIONS['th'][key] || key;
+}
+
+function applyLang() {
+  const T = TRANSLATIONS[currentLang];
+  // Header
+  document.getElementById('langToggle').textContent = currentLang === 'th' ? 'EN' : 'ไทย';
+  document.getElementById('siteLogo').innerHTML = currentLang === 'th' ? 'คลัง<span>ใบงาน</span>' : 'Free<span>Worksheets</span>';
+  document.getElementById('btnAdmin').textContent = T.btnAdmin;
+  document.getElementById('total-downloads').textContent = '↓ ' + (allWorksheets.reduce((s,w)=>s+(w.download_count||0),0)).toLocaleString() + ' ' + T.downloadCount;
+  // Hero
+  document.querySelector('.hero h1').innerHTML = T.heroTitle;
+  document.querySelector('.hero p').textContent = T.heroSub;
+  document.getElementById('search').placeholder = T.searchPlaceholder;
+  // Filter
+  document.querySelector('.filter-label').textContent = T.categoryLabel;
+  document.querySelectorAll('.cat-btn[data-cat="all"]').forEach(b => b.textContent = T.allLabel);
+  // Subject bar
+  const sl = document.querySelector('.subject-bar .filter-label');
+  if(sl) sl.textContent = T.subjectLabel;
+  const sb2 = document.querySelector('.subj-btn[data-subj="all"]');
+  if(sb2) sb2.textContent = T.allLabel;
+  // Result
+  renderGrid();
+  // Admin
+  document.querySelector('.admin-header h2').textContent = T.adminTitle;
+  // Password modal
+  document.querySelector('.pw-title').textContent = T.pwTitle;
+  document.querySelector('.pw-sub').textContent = T.pwSub;
+  document.getElementById('pwInput').placeholder = T.pwPlaceholder;
+  document.querySelector('.pw-btn').textContent = T.pwBtn;
+  document.querySelector('.pw-cancel').textContent = T.pwCancel;
+  // Re-render dynamic elements
+  renderCategoryBar();
+  renderSubjectBar();
+  // Admin tabs
+  const tabs = document.querySelectorAll('.admin-tab');
+  if(tabs[0]) tabs[0].textContent = T.tabUpload;
+  if(tabs[1]) tabs[1].textContent = T.tabManage;
+  if(tabs[2]) tabs[2].textContent = T.tabSubjects;
+  if(tabs[3]) tabs[3].textContent = T.tabCategories;
+}
+
+function toggleLang() {
+  currentLang = currentLang === 'th' ? 'en' : 'th';
+  applyLang();
+}
+
+
+function showToast(msg, type='success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast ' + type + ' show';
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+function previewFile(input, previewDivId, previewImgId) {
+  const divId = previewDivId || 'uploadPreview';
+  const imgId = previewImgId || 'previewImg';
+  if(input.files && input.files[0]) {
+    const reader = new FileReader();
+    reader.onload = e => {
+      document.getElementById(imgId).src = e.target.result;
+      document.getElementById(divId).classList.add('show');
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+
+async function uploadWorksheet() {
+  const title = document.getElementById('ws-title').value.trim();
+  const titleEn = document.getElementById('ws-title-en').value.trim();
+  const category = document.getElementById('ws-cat').value;
+  const desc = document.getElementById('ws-desc').value.trim();
+  const descEn = document.getElementById('ws-desc-en').value.trim();
+  const tagsRaw = document.getElementById('ws-tags').value.trim();
+  const subject = document.getElementById('ws-subj').value;
+  const file = document.getElementById('ws-file').files[0];
+  const coloringFile = document.getElementById('ws-file-coloring').files[0];
+
+  if (!title) { showToast('กรุณากรอกชื่อใบงาน','error'); return; }
+  if (!category) { showToast('กรุณาเลือกหมวดหมู่','error'); return; }
+  if (!file) { showToast('กรุณาเลือกไฟล์แบบสี','error'); return; }
+
+  const btn = document.getElementById('btnSubmit');
+  btn.disabled = true; btn.textContent = 'กำลังอัปโหลด...';
+  const pw = document.getElementById('progressWrap');
+  const pf = document.getElementById('progressFill');
+  const pt = document.getElementById('progressText');
+  pw.classList.add('show'); pf.style.width='20%'; pt.textContent='กำลังอัปโหลดรูปภาพ...';
+
+  try {
+    const catMap = {"อนุบาล1":"kg1","อนุบาล2":"kg2","อนุบาล3":"kg3","ป.1":"p1","ป.2":"p2","ป.3":"p3","ป.4":"p4","ป.5":"p5","ป.6":"p6"};
+    const catFolder = catMap[category] || category.replace(/[^a-zA-Z0-9]/g,'') || "other";
+    const ext = file.name.split('.').pop();
+    const fileName = Date.now() + '_' + Math.random().toString(36).slice(2) + '.' + ext;
+    const filePath = catFolder + '/' + fileName;
+
+    const upRes = await sb.storage.from(BUCKET).upload(filePath, file, {contentType: file.type});
+    if (upRes.error) throw upRes.error;
+
+    pf.style.width='60%'; pt.textContent='กำลังบันทึกข้อมูล...';
+    const { data: { publicUrl } } = sb.storage.from(BUCKET).getPublicUrl(filePath);
+
+    let coloringUrl = null, coloringPath = null;
+    if (coloringFile) {
+      const ext2 = coloringFile.name.split('.').pop();
+      const fileName2 = Date.now() + '_coloring_' + Math.random().toString(36).slice(2) + '.' + ext2;
+      const filePath2 = catFolder + '/' + fileName2;
+      const upRes2 = await sb.storage.from(BUCKET).upload(filePath2, coloringFile, {contentType: coloringFile.type});
+      if (!upRes2.error) {
+        const { data: { publicUrl: pu2 } } = sb.storage.from(BUCKET).getPublicUrl(filePath2);
+        coloringUrl = pu2; coloringPath = filePath2;
+      }
+    }
+
+    const tags = tagsRaw ? tagsRaw.split(',').map(t=>t.trim()).filter(Boolean) : [];
+    const dbRes = await sb.from('worksheets').insert({
+      title, title_en: titleEn||null,
+      category, subject: subject||null,
+      description: desc, description_en: descEn||null,
+      tags, image_url: publicUrl, file_path: filePath,
+      coloring_url: coloringUrl, coloring_path: coloringPath, download_count: 0
+    });
+    if (dbRes.error) throw dbRes.error;
+
+    pf.style.width='100%'; pt.textContent='อัปโหลดสำเร็จ! ✓';
+    showToast('✓ อัปโหลด "' + title + '" สำเร็จ!', 'success');
+
+    setTimeout(() => {
+      ['ws-title','ws-title-en','ws-desc','ws-desc-en','ws-tags'].forEach(id => document.getElementById(id).value='');
+      document.getElementById('ws-cat').value='';
+      document.getElementById('ws-subj').value='';
+      document.getElementById('ws-file').value='';
+      document.getElementById('ws-file-coloring').value='';
+      document.getElementById('uploadPreview').classList.remove('show');
+      document.getElementById('uploadPreview2').classList.remove('show');
+      pw.classList.remove('show'); pf.style.width='0%';
+      btn.disabled=false; btn.textContent='📤 อัปโหลดใบงาน';
+    }, 1500);
+    await loadWorksheets();
+  } catch(e) {
+    showToast('เกิดข้อผิดพลาด: '+(e.message||'กรุณาลองใหม่'),'error');
+    pw.classList.remove('show'); btn.disabled=false; btn.textContent='📤 อัปโหลดใบงาน';
+  }
+}
+
+
+function switchTab(tab) {
+  document.querySelectorAll('.admin-tab').forEach((t,i) => {
+    t.classList.toggle('active',
+      (i===0&&tab==='upload') ||
+      (i===1&&tab==='manage') ||
+      (i===2&&tab==='subjects') ||
+      (i===3&&tab==='categories')
+    );
+  });
+  document.getElementById('tab-upload').classList.toggle('active', tab==='upload');
+  document.getElementById('tab-manage').classList.toggle('active', tab==='manage');
+  document.getElementById('tab-subjects').classList.toggle('active', tab==='subjects');
+  document.getElementById('tab-categories').classList.toggle('active', tab==='categories');
+  if(tab==='manage') renderManageList();
+  if(tab==='subjects') renderSubjectManageList();
+  if(tab==='categories') renderCategoryManageList();
+}
+
+function renderManageList() {
+  const list = document.getElementById('manageList');
+  if (!allWorksheets.length) { list.innerHTML='<div class="empty"><span class="empty-icon">📭</span>ยังไม่มีใบงาน</div>'; return; }
+  list.innerHTML = allWorksheets.map(w=>`
+    <div class="manage-item">
+      ${w.image_url ? `<img class="manage-thumb" src="${w.image_url}" alt="">` : `<div class="manage-thumb" style="display:flex;align-items:center;justify-content:center;font-size:1.5rem">📄</div>`}
+      <div class="manage-info">
+        <div class="manage-name">${w.title}</div>
+        <div class="manage-cat">${w.category}${w.subject?' · '+w.subject:''} · ↓ ${w.download_count||0} ครั้ง</div>
+      </div>
+      <button class="btn-delete" onclick="deleteWorksheet('${w.id}','${w.file_path}','${w.title}')">🗑️ ลบ</button>
+    </div>`).join('');
+}
+
+async function deleteWorksheet(id, filePath, title) {
+  if (!confirm('ต้องการลบ "' + title + '" ใช่หรือไม่?')) return;
+  try {
+    if (filePath) await sb.storage.from(BUCKET).remove([filePath]);
+    const res = await sb.from('worksheets').delete().eq('id', String(id));
+    if (res.error) throw res.error;
+    showToast('✓ ลบ "' + title + '" สำเร็จ', 'success');
+    await loadWorksheets(); renderManageList();
+  } catch(e) { showToast('เกิดข้อผิดพลาด: '+(e.message||'กรุณาลองใหม่'), 'error'); }
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function openModal(id) {
+  currentItem = allWorksheets.find(w => w.id == id);
+  if (!currentItem) return;
+  document.getElementById('modal-img-wrap').innerHTML = currentItem.image_url
+    ? `<img class="modal-img" src="${currentItem.image_url}" alt="${currentItem.title}">`
+    : `<div class="modal-img-placeholder">📄</div>`;
+  document.getElementById('modal-title').textContent = currentLang==='en'&&currentItem.title_en ? currentItem.title_en : currentItem.title;
+  const _cat = allCategories.find(c=>c.name===currentItem.category);
+  const _catLabel = currentLang==='en'&&_cat&&_cat.name_en ? _cat.name_en : currentItem.category;
+  const _subj = allSubjects.find(s=>s.name===currentItem.subject);
+  const _subjLabel = currentItem.subject ? (currentLang==='en'&&_subj&&_subj.name_en ? _subj.name_en : currentItem.subject) : null;
+  document.getElementById('modal-meta').innerHTML =
+    '<div class="meta-chip">📁 ' + _catLabel + '</div>' +
+    (_subjLabel ? '<div class="meta-chip">📚 ' + _subjLabel + '</div>' : '') +
+    '<div class="meta-chip">↓ ' + (currentItem.download_count||0).toLocaleString() + ' ครั้ง</div>';
+  document.getElementById('modal-desc').textContent = (currentLang==='en'&&currentItem.description_en ? currentItem.description_en : currentItem.description) || '';
+  document.getElementById('modal-tags').innerHTML = currentItem.tags ? currentItem.tags.map(t=>'<span class="tag">#'+t+'</span>').join('') : '';
+  const hasBoth = currentItem.coloring_url;
+  document.getElementById('modalDlButtons').innerHTML = hasBoth
+    ? '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem"><button class="btn-download" onclick="downloadCurrent(\'color\')" style="background:var(--accent)">' + t('btnColor') + '</button><button class="btn-download" onclick="downloadCurrent(\'coloring\')" style="background:#e07b39">' + t('btnColoring') + '</button></div>'
+    : '<button class="btn-download" onclick="downloadCurrent(\'color\')" style="background:var(--accent)">' + t('btnDownloadFree') + '</button>';
+  document.getElementById('modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+async function downloadCurrent(mode) { if (currentItem) await doDownload(currentItem, mode||'color'); }
+async function quickDownload(id) { const item = allWorksheets.find(w=>w.id==id); if(item) await openModal(id); }
+
+
+document.getElementById('search').addEventListener('input', e => { currentSearch=e.target.value; renderGrid(); });
+document.getElementById('ws-cat').addEventListener('change', updateUploadSubjectSelect);
+
+document.getElementById('modal').addEventListener('click', e => { if(e.target===document.getElementById('modal')) closeModal(); });
+document.getElementById('adminPanel').addEventListener('click', e => { if(e.target===document.getElementById('adminPanel')) closeAdmin(); });
+document.getElementById('pwOverlay').addEventListener('click', e => { if(e.target===document.getElementById('pwOverlay')) closePwModal(); });
+document.addEventListener('keydown', e => { if(e.key==='Escape'){closeModal();closeAdmin();closePwModal();} });
+
+const uploadZone = document.getElementById('uploadZone');
+uploadZone.addEventListener('dragover', e=>{e.preventDefault();uploadZone.classList.add('drag-over');});
+uploadZone.addEventListener('dragleave', ()=>uploadZone.classList.remove('drag-over'));
+uploadZone.addEventListener('drop', e=>{
+  e.preventDefault(); uploadZone.classList.remove('drag-over');
+  const file=e.dataTransfer.files[0];
+  if(file&&file.type.startsWith('image/')){
+    const input=document.getElementById('ws-file');
+    const dt=new DataTransfer(); dt.items.add(file); input.files=dt.files; previewFile(input,'uploadPreview','previewImg');
+  }
+});
+
+const ADMIN_PASSWORD = '047494809$Ml';
+let isAuthenticated = false;
+
+function openAdmin() {
+  if (isAuthenticated) {
+    document.getElementById('adminPanel').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  } else {
+    document.getElementById('pwInput').value = '';
+    document.getElementById('pwError').textContent = '';
+    document.getElementById('pwOverlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+    setTimeout(() => document.getElementById('pwInput').focus(), 300);
+  }
+}
+
+function checkPassword() {
+  const val = document.getElementById('pwInput').value;
+  if (val === ADMIN_PASSWORD) {
+    isAuthenticated = true;
+    closePwModal();
+    document.getElementById('adminPanel').classList.add('open');
+  } else {
+    const input = document.getElementById('pwInput');
+    document.getElementById('pwError').textContent = '❌ รหัสผ่านไม่ถูกต้อง กรุณาลองใหม่';
+    input.classList.add('shake');
+    input.value = '';
+    setTimeout(() => input.classList.remove('shake'), 400);
+  }
+}
+
+function closePwModal() {
+  document.getElementById('pwOverlay').classList.remove('open');
+  if (!document.getElementById('adminPanel').classList.contains('open')) {
+    document.body.style.overflow = '';
+  }
+}
+
+function togglePw() {
+  const input = document.getElementById('pwInput');
+  const btn = document.getElementById('pwToggle');
+  if (input.type === 'password') { input.type = 'text'; btn.textContent = '🙈'; }
+  else { input.type = 'password'; btn.textContent = '👁️'; }
+}
+
+function closeAdmin() {
+  document.getElementById('adminPanel').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+init();
+</script>
+<footer style="background:var(--accent);color:rgba(255,255,255,0.7);text-align:center;padding:1.5rem;font-size:0.85rem;margin-top:3rem">
+  <p style="margin-bottom:0.5rem">© 2026 FreeWorksheetKids.com — Free Educational Worksheets for Kids</p>
+  <p>
+    <a href="/qr-generator.html" style="color:rgba(255,255,255,0.9);margin:0 0.75rem">🔲 QR Generator</a> ·
+    <a href="/about.html" style="color:rgba(255,255,255,0.9);margin:0 0.75rem">About Us</a> ·
+    <a href="/contact.html" style="color:rgba(255,255,255,0.9);margin:0 0.75rem">Contact</a> ·
+    <a href="/privacy-policy.html" style="color:rgba(255,255,255,0.9);margin:0 0.75rem">Privacy Policy</a>
+  </p>
+</footer>
+</body>
+</html>
