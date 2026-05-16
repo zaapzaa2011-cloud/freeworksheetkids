@@ -1369,7 +1369,18 @@ function openModal(id) {
     (_subjLabel ? '<div class="meta-chip">📚 ' + _subjLabel + '</div>' : '') +
     '<div class="meta-chip">↓ ' + (currentItem.download_count||0).toLocaleString() + ' ครั้ง</div>';
   document.getElementById('modal-desc').textContent = (currentLang==='en'&&currentItem.description_en ? currentItem.description_en : currentItem.description) || '';
-  document.getElementById('modal-tags').innerHTML = currentItem.tags ? currentItem.tags.map(t=>'<span class="tag">#'+t+'</span>').join('') : '';
+  // Filter tags by language
+  if (currentItem.tags && currentItem.tags.length) {
+    const thaiRegex = /[ก-๙]/;
+    const filtered = currentItem.tags.filter(t =>
+      currentLang === 'th' ? thaiRegex.test(t) : !thaiRegex.test(t)
+    );
+    // If no tags for current lang, show all
+    const tagsToShow = filtered.length > 0 ? filtered : currentItem.tags;
+    document.getElementById('modal-tags').innerHTML = tagsToShow.map(t=>'<span class="tag">#'+t+'</span>').join('');
+  } else {
+    document.getElementById('modal-tags').innerHTML = '';
+  }
   const hasBoth = currentItem.coloring_url;
   // Use EN versions if available and in EN mode
   const useEn = currentLang === 'en';
