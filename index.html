@@ -3,7 +3,40 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>คลังใบงาน — ฟรีสำหรับทุกคน</title>
+<title>Free Worksheets for Kids — Kindergarten to Grade 6 | FreeWorksheetKids.com</title>
+<meta name="description" content="Download free printable worksheets for kids — Kindergarten to Grade 6. Math, Thai, Art, Science and more. Color and coloring page versions available.">
+<meta name="keywords" content="free worksheets for kids, printable worksheets, kindergarten worksheets, grade 1 worksheets, free worksheet download, ใบงานฟรี, ใบงานเด็ก">
+<meta name="robots" content="index, follow">
+<meta name="author" content="FreeWorksheetKids.com">
+<link rel="canonical" href="https://freeworksheetkids.com/">
+
+<!-- Open Graph (Facebook, Line) -->
+<meta property="og:title" content="Free Worksheets for Kids — FreeWorksheetKids.com">
+<meta property="og:description" content="Download free printable worksheets for Kindergarten to Grade 6. Math, Art, Thai Language and more.">
+<meta property="og:url" content="https://freeworksheetkids.com/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="FreeWorksheetKids.com">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Free Worksheets for Kids">
+<meta name="twitter:description" content="Download free printable worksheets for Kindergarten to Grade 6.">
+
+<!-- Schema.org Structured Data -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "FreeWorksheetKids.com",
+  "url": "https://freeworksheetkids.com",
+  "description": "Free printable worksheets for kids from Kindergarten to Grade 6",
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": "https://freeworksheetkids.com/?search={search_term_string}",
+    "query-input": "required name=search_term_string"
+  }
+}
+</script>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700;800&family=Chakra+Petch:wght@400;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
@@ -203,6 +236,7 @@ header {
   <div class="header-actions">
     <div class="stats-badge" id="total-downloads">↓ 0 ครั้ง</div>
     <a href="/qr-generator.html" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:white;font-family:'Sarabun',sans-serif;font-size:0.82rem;padding:6px 12px;border-radius:6px;text-decoration:none;transition:all 0.15s" onmouseover="this.style.background='rgba(255,255,255,0.25)'" onmouseout="this.style.background='rgba(255,255,255,0.15)'">🔲 QR Code</a>
+    <a href="/classroom-timer.html" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:white;font-family:'Sarabun',sans-serif;font-size:0.82rem;padding:6px 12px;border-radius:6px;text-decoration:none;transition:all 0.15s" onmouseover="this.style.background='rgba(255,255,255,0.25)'" onmouseout="this.style.background='rgba(255,255,255,0.15)'">⏱️ Timer</a>
     <button class="btn-lang" id="langToggle" onclick="toggleLang()">EN</button>
     <button class="btn-admin" id="btnAdmin" onclick="openAdmin()">⚙️ จัดการใบงาน</button>
   </div>
@@ -317,7 +351,7 @@ header {
           </div>
         </div>
         <div class="form-group">
-          <label class="form-label">🖍️ ไฟล์แบบระบายสี <span style="color:var(--muted);font-weight:400">(ถ้ามี)</span></label>
+          <label class="form-label">🖍️ ไฟล์แบบระบายสี (ภาษาไทย) <span style="color:var(--muted);font-weight:400">(ถ้ามี)</span></label>
           <div class="upload-zone" id="uploadZone2">
             <input type="file" id="ws-file-coloring" accept="image/*" onchange="previewFile(this,'uploadPreview2','previewImg2')">
             <span class="upload-icon">🖍️</span>
@@ -327,6 +361,37 @@ header {
             </div>
             <div class="upload-preview" id="uploadPreview2">
               <img id="previewImg2" src="" alt="">
+            </div>
+          </div>
+        </div>
+        <div style="border-top:1.5px dashed var(--border);margin:1.25rem 0;padding-top:0.25rem">
+          <div style="font-size:0.8rem;font-weight:700;color:var(--muted);font-family:'Chakra Petch',sans-serif;margin-bottom:1rem">🇬🇧 ENGLISH VERSION (Optional)</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">🎨 Color Version (English)</label>
+          <div class="upload-zone" id="uploadZone3">
+            <input type="file" id="ws-file-en" accept="image/*" onchange="previewFile(this,'uploadPreview3','previewImg3')">
+            <span class="upload-icon">🖼️</span>
+            <div class="upload-text">
+              <strong>Click or drag file here</strong><br>
+              English color version (JPG, PNG)
+            </div>
+            <div class="upload-preview" id="uploadPreview3">
+              <img id="previewImg3" src="" alt="">
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">🖍️ Coloring Page (English) <span style="color:var(--muted);font-weight:400">(optional)</span></label>
+          <div class="upload-zone" id="uploadZone4">
+            <input type="file" id="ws-file-coloring-en" accept="image/*" onchange="previewFile(this,'uploadPreview4','previewImg4')">
+            <span class="upload-icon">🖍️</span>
+            <div class="upload-text">
+              <strong>Click or drag file here</strong><br>
+              English coloring page version
+            </div>
+            <div class="upload-preview" id="uploadPreview4">
+              <img id="previewImg4" src="" alt="">
             </div>
           </div>
         </div>
@@ -578,6 +643,23 @@ async function addSubject() {
   }
 }
 
+async function editSubject(id, oldName, oldNameEn) {
+  const newName = prompt('ชื่อวิชา (ภาษาไทย):', oldName);
+  if (!newName || newName === oldName) return;
+  const newNameEn = prompt('Subject Name (English):', oldNameEn||'');
+  try {
+    const res = await sb.from('subjects').update({ name: String(newName), name_en: newNameEn||null }).eq('id', String(id));
+    if (res.error) throw res.error;
+    // Update worksheets using this subject
+    await sb.from('worksheets').update({ subject: String(newName) }).eq('subject', String(oldName));
+    showToast('✓ แก้ไขวิชาสำเร็จ', 'success');
+    await loadSubjects();
+    renderSubjectManageList();
+    renderSubjectBar();
+  } catch(e) { showToast('เกิดข้อผิดพลาด: ' + (e.message||'กรุณาลองใหม่'), 'error'); }
+}
+
+
 async function deleteSubject(id, name) {
   if (!confirm('ลบวิชา "' + name + '" ใช่หรือไม่?')) return;
   try {
@@ -608,11 +690,16 @@ function renderSubjectManageList() {
   el.innerHTML = Object.entries(grouped).map(([cat, subjects]) => `
     <div style="margin-bottom:1rem">
       <div style="font-size:0.78rem;font-weight:700;color:var(--accent);margin-bottom:0.4rem;font-family:'Chakra Petch',monospace">${cat}</div>
-      <div style="display:flex;flex-wrap:wrap;gap:0.4rem">
+      <div style="display:flex;flex-direction:column;gap:0.4rem">
         ${subjects.map(s => `
-          <div style="display:flex;align-items:center;gap:4px;background:var(--tag-bg);border:1.5px solid var(--border);padding:4px 10px;border-radius:20px">
-            <span style="font-size:0.82rem;font-weight:600;color:var(--accent)">${s.name}</span>
-            <button onclick="deleteSubject('${s.id}','${s.name}')" style="background:none;border:none;cursor:pointer;color:#e76f51;font-size:0.9rem;padding:0;line-height:1">×</button>
+          <div class="manage-item" style="padding:0.6rem 0.75rem">
+            <div class="manage-info">
+              <div class="manage-name" style="font-size:0.88rem">${s.name}${s.name_en?' <span style="color:var(--muted);font-weight:400;font-size:0.8rem">/ '+s.name_en+'</span>':''}</div>
+            </div>
+            <div style="display:flex;gap:0.4rem;flex-shrink:0">
+              <button onclick="editSubject('${s.id}','${s.name}','${s.name_en||''}')" style="background:#eaf2ee;border:1.5px solid #b7dcc8;color:var(--accent);padding:5px 8px;border-radius:6px;font-size:0.78rem;cursor:pointer;font-family:'Sarabun',sans-serif">✏️</button>
+              <button onclick="deleteSubject('${s.id}','${s.name}')" style="background:#fef0ee;border:1.5px solid #fbd0c8;color:#e76f51;padding:5px 8px;border-radius:6px;font-size:0.78rem;cursor:pointer">🗑️</button>
+            </div>
           </div>`).join('')}
       </div>
     </div>`).join('');
@@ -735,6 +822,7 @@ async function quickDownload(id) { const item = allWorksheets.find(w=>w.id==id);
 
 async function doDownload(item, mode) {
   if (!item.image_url) return;
+  const useEn = currentLang === 'en';
 
   async function triggerDownload(url, filename) {
     try {
@@ -754,17 +842,21 @@ async function doDownload(item, mode) {
   }
 
   if (mode === 'coloring') {
-    if (item.coloring_url) {
-      await triggerDownload(item.coloring_url, item.title + '_ระบายสี.png');
-      showToast('✓ ดาวน์โหลดแบบระบายสีสำเร็จ!', 'success');
+    const coloringUrl = (useEn && item.coloring_url_en) ? item.coloring_url_en : item.coloring_url;
+    if (coloringUrl) {
+      const name = (useEn && item.title_en ? item.title_en : item.title);
+      await triggerDownload(coloringUrl, name + '_coloring.png');
+      showToast('✓ ' + t('btnColoring') + ' downloaded!', 'success');
     } else {
       showToast('ไม่มีไฟล์แบบระบายสีสำหรับใบงานนี้', 'error');
       return;
     }
   } else {
-    const ext = item.image_url.split('.').pop().split('?')[0] || 'png';
-    await triggerDownload(item.image_url, item.title + '.' + ext);
-    showToast('✓ กำลังดาวน์โหลด "' + item.title + '"', 'success');
+    const colorUrl = (useEn && item.image_url_en) ? item.image_url_en : item.image_url;
+    const name = (useEn && item.title_en ? item.title_en : item.title);
+    const ext = colorUrl.split('.').pop().split('?')[0] || 'png';
+    await triggerDownload(colorUrl, name + '.' + ext);
+    showToast('✓ Downloaded: ' + name, 'success');
   }
 
   // Update download count
@@ -936,6 +1028,8 @@ async function uploadWorksheet() {
   const subject = document.getElementById('ws-subj').value;
   const file = document.getElementById('ws-file').files[0];
   const coloringFile = document.getElementById('ws-file-coloring').files[0];
+  const fileEn = document.getElementById('ws-file-en').files[0];
+  const coloringFileEn = document.getElementById('ws-file-coloring-en').files[0];
 
   if (!title) { showToast('กรุณากรอกชื่อใบงาน','error'); return; }
   if (!category) { showToast('กรุณาเลือกหมวดหมู่','error'); return; }
@@ -974,12 +1068,39 @@ async function uploadWorksheet() {
     }
 
     const tags = tagsRaw ? tagsRaw.split(',').map(t=>t.trim()).filter(Boolean) : [];
+    // Upload EN color file
+    let imageUrlEn = null, filePathEn = null;
+    if (fileEn) {
+      const extEn = fileEn.name.split('.').pop();
+      const fileNameEn = Date.now() + '_en_' + Math.random().toString(36).slice(2) + '.' + extEn;
+      const fpEn = catFolder + '/' + fileNameEn;
+      const upEn = await sb.storage.from(BUCKET).upload(fpEn, fileEn, {contentType: fileEn.type});
+      if (!upEn.error) {
+        const { data: { publicUrl: puEn } } = sb.storage.from(BUCKET).getPublicUrl(fpEn);
+        imageUrlEn = puEn; filePathEn = fpEn;
+      }
+    }
+    // Upload EN coloring file
+    let coloringUrlEn = null, coloringPathEn = null;
+    if (coloringFileEn) {
+      const extCEn = coloringFileEn.name.split('.').pop();
+      const fileNameCEn = Date.now() + '_coloring_en_' + Math.random().toString(36).slice(2) + '.' + extCEn;
+      const fpCEn = catFolder + '/' + fileNameCEn;
+      const upCEn = await sb.storage.from(BUCKET).upload(fpCEn, coloringFileEn, {contentType: coloringFileEn.type});
+      if (!upCEn.error) {
+        const { data: { publicUrl: puCEn } } = sb.storage.from(BUCKET).getPublicUrl(fpCEn);
+        coloringUrlEn = puCEn; coloringPathEn = fpCEn;
+      }
+    }
     const dbRes = await sb.from('worksheets').insert({
       title, title_en: titleEn||null,
       category, subject: subject||null,
       description: desc, description_en: descEn||null,
       tags, image_url: publicUrl, file_path: filePath,
-      coloring_url: coloringUrl, coloring_path: coloringPath, download_count: 0
+      coloring_url: coloringUrl, coloring_path: coloringPath,
+      image_url_en: imageUrlEn, file_path_en: filePathEn,
+      coloring_url_en: coloringUrlEn, coloring_path_en: coloringPathEn,
+      download_count: 0
     });
     if (dbRes.error) throw dbRes.error;
 
@@ -992,8 +1113,12 @@ async function uploadWorksheet() {
       document.getElementById('ws-subj').value='';
       document.getElementById('ws-file').value='';
       document.getElementById('ws-file-coloring').value='';
+      document.getElementById('ws-file-en').value='';
+      document.getElementById('ws-file-coloring-en').value='';
       document.getElementById('uploadPreview').classList.remove('show');
       document.getElementById('uploadPreview2').classList.remove('show');
+      document.getElementById('uploadPreview3').classList.remove('show');
+      document.getElementById('uploadPreview4').classList.remove('show');
       pw.classList.remove('show'); pf.style.width='0%';
       btn.disabled=false; btn.textContent='📤 อัปโหลดใบงาน';
     }, 1500);
@@ -1023,6 +1148,94 @@ function switchTab(tab) {
   if(tab==='categories') renderCategoryManageList();
 }
 
+async function editWorksheet(id) {
+  const w = allWorksheets.find(x => x.id == id);
+  if (!w) return;
+
+  // Build edit modal HTML
+  const cats = allCategories.map(c => `<option value="${c.name}"${w.category===c.name?' selected':''}>${c.name}</option>`).join('');
+  const subjs = allSubjects.filter(s=>s.category===w.category).map(s=>`<option value="${s.name}"${w.subject===s.name?' selected':''}>${s.name}</option>`).join('');
+
+  const html = `
+    <div id="editModal" style="position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:2000;display:flex;align-items:center;justify-content:center;padding:1.5rem;backdrop-filter:blur(4px)">
+      <div style="background:white;border-radius:16px;width:100%;max-width:520px;max-height:90vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,0.25)">
+        <div style="background:var(--accent);padding:1.25rem 1.5rem;display:flex;align-items:center;justify-content:space-between;border-radius:16px 16px 0 0">
+          <h2 style="color:white;font-family:'Chakra Petch',sans-serif;font-size:1.1rem">✏️ แก้ไขใบงาน</h2>
+          <button onclick="document.getElementById('editModal').remove()" style="background:rgba(255,255,255,0.15);border:none;color:white;width:32px;height:32px;border-radius:6px;cursor:pointer;font-size:1rem">✕</button>
+        </div>
+        <div style="padding:1.5rem">
+          <div class="form-group">
+            <label class="form-label">ชื่อใบงาน (ภาษาไทย) <span>*</span></label>
+            <input class="form-input" id="edit-title" value="${w.title||''}">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Worksheet Name (English)</label>
+            <input class="form-input" id="edit-title-en" value="${w.title_en||''}">
+          </div>
+          <div class="form-group">
+            <label class="form-label">หมวดหมู่ <span>*</span></label>
+            <select class="form-select" id="edit-cat">${cats}</select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">วิชา</label>
+            <select class="form-select" id="edit-subj">
+              <option value="">-- เลือกวิชา --</option>
+              ${subjs}
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">คำอธิบาย (ภาษาไทย)</label>
+            <textarea class="form-textarea" id="edit-desc">${w.description||''}</textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Description (English)</label>
+            <textarea class="form-textarea" id="edit-desc-en">${w.description_en||''}</textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">แท็ก (คั่นด้วยจุลภาค)</label>
+            <input class="form-input" id="edit-tags" value="${w.tags?w.tags.join(', '):''}">
+          </div>
+          <button onclick="saveWorksheet('${w.id}')" class="btn-submit" style="margin-top:0.5rem">💾 บันทึกการแก้ไข</button>
+        </div>
+      </div>
+    </div>`;
+  document.body.insertAdjacentHTML('beforeend', html);
+
+  // Update subjects when category changes
+  document.getElementById('edit-cat').addEventListener('change', function() {
+    const cat = this.value;
+    const subjs = allSubjects.filter(s=>s.category===cat).map(s=>`<option value="${s.name}">${s.name}</option>`).join('');
+    document.getElementById('edit-subj').innerHTML = '<option value="">-- เลือกวิชา --</option>' + subjs;
+  });
+}
+
+async function saveWorksheet(id) {
+  const title = document.getElementById('edit-title').value.trim();
+  const titleEn = document.getElementById('edit-title-en').value.trim();
+  const cat = document.getElementById('edit-cat').value;
+  const subj = document.getElementById('edit-subj').value;
+  const desc = document.getElementById('edit-desc').value.trim();
+  const descEn = document.getElementById('edit-desc-en').value.trim();
+  const tagsRaw = document.getElementById('edit-tags').value.trim();
+  if (!title) { showToast('กรุณากรอกชื่อใบงาน', 'error'); return; }
+  if (!cat) { showToast('กรุณาเลือกหมวดหมู่', 'error'); return; }
+  const tags = tagsRaw ? tagsRaw.split(',').map(t=>t.trim()).filter(Boolean) : [];
+  try {
+    const res = await sb.from('worksheets').update({
+      title, title_en: titleEn||null, category: cat,
+      subject: subj||null, description: desc, description_en: descEn||null, tags
+    }).eq('id', String(id));
+    if (res.error) throw res.error;
+    showToast('✓ แก้ไขใบงานสำเร็จ!', 'success');
+    document.getElementById('editModal').remove();
+    await loadWorksheets();
+    renderManageList();
+  } catch(e) {
+    showToast('เกิดข้อผิดพลาด: ' + (e.message||'กรุณาลองใหม่'), 'error');
+  }
+}
+
+
 function renderManageList() {
   const list = document.getElementById('manageList');
   if (!allWorksheets.length) { list.innerHTML='<div class="empty"><span class="empty-icon">📭</span>ยังไม่มีใบงาน</div>'; return; }
@@ -1033,7 +1246,10 @@ function renderManageList() {
         <div class="manage-name">${w.title}</div>
         <div class="manage-cat">${w.category}${w.subject?' · '+w.subject:''} · ↓ ${w.download_count||0} ครั้ง</div>
       </div>
-      <button class="btn-delete" onclick="deleteWorksheet('${w.id}','${w.file_path}','${w.title}')">🗑️ ลบ</button>
+      <div style="display:flex;gap:0.4rem;flex-shrink:0">
+        <button onclick="editWorksheet('${w.id}')" style="background:#eaf2ee;border:1.5px solid #b7dcc8;color:var(--accent);padding:6px 10px;border-radius:6px;font-size:0.82rem;cursor:pointer;font-family:'Sarabun',sans-serif">✏️ แก้ไข</button>
+        <button class="btn-delete" onclick="deleteWorksheet('${w.id}','${w.file_path}','${w.title}')">🗑️ ลบ</button>
+      </div>
     </div>`).join('');
 }
 
@@ -1071,7 +1287,13 @@ function openModal(id) {
   document.getElementById('modal-desc').textContent = (currentLang==='en'&&currentItem.description_en ? currentItem.description_en : currentItem.description) || '';
   document.getElementById('modal-tags').innerHTML = currentItem.tags ? currentItem.tags.map(t=>'<span class="tag">#'+t+'</span>').join('') : '';
   const hasBoth = currentItem.coloring_url;
-  document.getElementById('modalDlButtons').innerHTML = hasBoth
+  // Use EN versions if available and in EN mode
+  const useEn = currentLang === 'en';
+  const colorUrl = useEn && currentItem.image_url_en ? currentItem.image_url_en : currentItem.image_url;
+  const coloringUrl2 = useEn && currentItem.coloring_url_en ? currentItem.coloring_url_en : currentItem.coloring_url;
+  const hasColor = !!colorUrl;
+  const hasColoring = !!coloringUrl2;
+  document.getElementById('modalDlButtons').innerHTML = hasColoring
     ? '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem"><button class="btn-download" onclick="downloadCurrent(\'color\')" style="background:var(--accent)">' + t('btnColor') + '</button><button class="btn-download" onclick="downloadCurrent(\'coloring\')" style="background:#e07b39">' + t('btnColoring') + '</button></div>'
     : '<button class="btn-download" onclick="downloadCurrent(\'color\')" style="background:var(--accent)">' + t('btnDownloadFree') + '</button>';
   document.getElementById('modal').classList.add('open');
@@ -1158,6 +1380,7 @@ init();
   <p style="margin-bottom:0.5rem">© 2026 FreeWorksheetKids.com — Free Educational Worksheets for Kids</p>
   <p>
     <a href="/qr-generator.html" style="color:rgba(255,255,255,0.9);margin:0 0.75rem">🔲 QR Generator</a> ·
+    <a href="/classroom-timer.html" style="color:rgba(255,255,255,0.9);margin:0 0.75rem">⏱️ Timer</a> ·
     <a href="/about.html" style="color:rgba(255,255,255,0.9);margin:0 0.75rem">About Us</a> ·
     <a href="/contact.html" style="color:rgba(255,255,255,0.9);margin:0 0.75rem">Contact</a> ·
     <a href="/privacy-policy.html" style="color:rgba(255,255,255,0.9);margin:0 0.75rem">Privacy Policy</a>
