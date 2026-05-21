@@ -1,4 +1,21 @@
 User-agent: *
 Allow: /
 
+# Sitemap
 Sitemap: https://freeworksheetkids.com/sitemap.xml
+
+# AI Agents
+User-agent: GPTBot
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Googlebot
+Allow: /
+
+# LLMs.txt for AI agents
+# https://freeworksheetkids.com/llms.txt
